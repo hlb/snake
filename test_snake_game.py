@@ -1,6 +1,9 @@
 import unittest
 import pygame
-from snake_game import Snake, Food, Obstacle, GRID_WIDTH, GRID_HEIGHT, GRID_SIZE, UP, DOWN, LEFT, RIGHT
+from src import (
+    Snake, Food, Obstacle,
+    GRID_WIDTH, GRID_HEIGHT, UP, DOWN, LEFT, RIGHT
+)
 
 class TestSnakeGame(unittest.TestCase):
     def setUp(self):
