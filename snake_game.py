@@ -2,9 +2,48 @@ import pygame
 import random
 import sys
 import os
+from pygame import mixer
 
 # 初始化 Pygame
 pygame.init()
+
+# 初始化音效系統
+pygame.mixer.quit()  # 先關閉可能已經在運行的音效系統
+pygame.mixer.init(44100, -16, 2, 2048)
+pygame.mixer.set_num_channels(8)  # 設置更多聲道
+
+# 載入音效
+def load_sound(file_path):
+    if not os.path.exists(file_path):
+        print(f"找不到音效文件: {file_path}")
+        return None
+    try:
+        sound = pygame.mixer.Sound(file_path)
+        print(f"成功載入音效: {file_path}")
+        return sound
+    except Exception as e:
+        print(f"載入音效文件失敗 {file_path}: {str(e)}")
+        return None
+
+# 設置音效
+eat_sound = load_sound('sounds/eat.wav')
+crash_sound = load_sound('sounds/crash.wav')
+background_music = load_sound('sounds/background.wav')
+
+# 設置音量
+if eat_sound:
+    eat_sound.set_volume(0.4)
+if crash_sound:
+    crash_sound.set_volume(0.3)
+if background_music:
+    background_music.set_volume(0.8)  # 增加音量到 0.8
+    channel = pygame.mixer.Channel(0)
+    channel.set_volume(0.8)  # 增加通道音量到 0.8
+    try:
+        channel.play(background_music, loops=-1)
+        print("背景音樂開始播放")
+    except Exception as e:
+        print(f"播放背景音樂失敗: {str(e)}")
 
 # 顏色定義
 BLACK = (0, 0, 0)
@@ -15,6 +54,7 @@ SNAKE_COLOR = (152, 195, 121)
 FOOD_COLOR = (224, 108, 117)
 SCORE_COLOR = (229, 192, 123)
 GAME_OVER_COLOR = (224, 108, 117)
+OBSTACLE_COLOR = (97, 175, 239)
 
 # 遊戲設置
 WINDOW_WIDTH = 800
@@ -23,6 +63,13 @@ GRID_SIZE = 20
 GRID_WIDTH = WINDOW_WIDTH // GRID_SIZE
 GRID_HEIGHT = WINDOW_HEIGHT // GRID_SIZE
 SNAKE_SPEED = 10
+OBSTACLE_COUNT = 5  # 障礙物數量
+
+# 方向常量
+UP = (0, -1)
+DOWN = (0, 1)
+LEFT = (-1, 0)
+RIGHT = (1, 0)
 
 # 設置字體
 def get_font(size):
@@ -60,6 +107,30 @@ def draw_grid():
     for y in range(0, WINDOW_HEIGHT, GRID_SIZE):
         pygame.draw.line(screen, GRID_COLOR, (0, y), (WINDOW_WIDTH, y))
 
+class Obstacle:
+    def __init__(self):
+        self.positions = set()
+        self.color = OBSTACLE_COLOR
+        self.generate_obstacles()
+
+    def generate_obstacles(self):
+        self.positions.clear()
+        # 生成指定數量的障礙物
+        while len(self.positions) < OBSTACLE_COUNT:
+            pos = (random.randint(2, GRID_WIDTH-3), 
+                  random.randint(2, GRID_HEIGHT-3))
+            # 確保障礙物不會生成在蛇的初始位置附近
+            if pos[0] < GRID_WIDTH//2-2 or pos[0] > GRID_WIDTH//2+2 or \
+               pos[1] < GRID_HEIGHT//2-2 or pos[1] > GRID_HEIGHT//2+2:
+                self.positions.add(pos)
+
+    def render(self):
+        for pos in self.positions:
+            rect = pygame.Rect(pos[0] * GRID_SIZE + 1,
+                             pos[1] * GRID_SIZE + 1,
+                             GRID_SIZE - 2, GRID_SIZE - 2)
+            draw_rounded_rect(screen, self.color, rect, 3)
+
 class Snake:
     def __init__(self):
         self.length = 1
@@ -71,12 +142,23 @@ class Snake:
     def get_head_position(self):
         return self.positions[0]
 
-    def update(self):
+    def update(self, obstacles):
         cur = self.get_head_position()
         x, y = self.direction
         new = ((cur[0] + x) % GRID_WIDTH, (cur[1] + y) % GRID_HEIGHT)
-        if new in self.positions[3:]:
+        
+        # 檢查是否撞到障礙物
+        if new in obstacles.positions:
+            if crash_sound:
+                crash_sound.play()
             return False
+        
+        # 檢查是否撞到自己
+        if new in self.positions[3:]:
+            if crash_sound:
+                crash_sound.play()
+            return False
+            
         self.positions.insert(0, new)
         if len(self.positions) > self.length:
             self.positions.pop()
@@ -96,26 +178,25 @@ class Snake:
             draw_rounded_rect(screen, self.color, rect, radius)
 
 class Food:
-    def __init__(self):
+    def __init__(self, obstacles):
         self.position = (0, 0)
         self.color = FOOD_COLOR
+        self.obstacles = obstacles
         self.randomize_position()
 
     def randomize_position(self):
-        self.position = (random.randint(0, GRID_WIDTH-1), 
-                        random.randint(0, GRID_HEIGHT-1))
+        while True:
+            self.position = (random.randint(0, GRID_WIDTH-1), 
+                           random.randint(0, GRID_HEIGHT-1))
+            # 確保食物不會出現在障礙物上
+            if self.position not in self.obstacles.positions:
+                break
 
     def render(self):
         rect = pygame.Rect(self.position[0] * GRID_SIZE + 1,
                          self.position[1] * GRID_SIZE + 1,
                          GRID_SIZE - 2, GRID_SIZE - 2)
         draw_rounded_rect(screen, self.color, rect, 8)
-
-# 方向常量
-UP = (0, -1)
-DOWN = (0, 1)
-LEFT = (-1, 0)
-RIGHT = (1, 0)
 
 def show_game_over(screen, score):
     """顯示遊戲結束畫面"""
@@ -138,21 +219,27 @@ def show_game_over(screen, score):
 
 def main():
     snake = Snake()
-    food = Food()
+    obstacles = Obstacle()
+    food = Food(obstacles)
     font = get_font(36)
     game_over = False
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                if background_music:
+                    background_music.stop()
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 if game_over:
                     if event.key == pygame.K_SPACE:
                         snake.reset()
+                        obstacles.generate_obstacles()
                         food.randomize_position()
                         game_over = False
+                        if background_music:
+                            pygame.mixer.Channel(0).play(background_music, -1)
                 else:
                     if event.key == pygame.K_UP and snake.direction != DOWN:
                         snake.direction = UP
@@ -164,17 +251,22 @@ def main():
                         snake.direction = RIGHT
 
         if not game_over:
-            if not snake.update():
+            if not snake.update(obstacles):
                 game_over = True
+                if background_music:
+                    background_music.stop()
             
             if snake.get_head_position() == food.position:
                 snake.length += 1
                 snake.score += 1
                 food.randomize_position()
+                if eat_sound:
+                    eat_sound.play()
 
         # 繪製
         screen.fill(BACKGROUND)
         draw_grid()
+        obstacles.render()
         snake.render()
         food.render()
         
