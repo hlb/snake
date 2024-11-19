@@ -112,12 +112,12 @@ class Obstacle:
     def __init__(self):
         self.positions = set()
         self.color = OBSTACLE_COLOR
-        self.generate_obstacles()
+        self.generate_obstacles(OBSTACLE_COUNT)  # 初始障礙物數量
 
-    def generate_obstacles(self):
+    def generate_obstacles(self, count):
+        """生成指定數量的障礙物"""
         self.positions.clear()
-        # 生成指定數量的障礙物
-        while len(self.positions) < OBSTACLE_COUNT:
+        while len(self.positions) < count:
             pos = (random.randint(2, GRID_WIDTH-3), 
                   random.randint(2, GRID_HEIGHT-3))
             # 確保障礙物不會生成在蛇的初始位置附近
@@ -125,12 +125,47 @@ class Obstacle:
                pos[1] < GRID_HEIGHT//2-2 or pos[1] > GRID_HEIGHT//2+2:
                 self.positions.add(pos)
 
+    def add_obstacle(self, snake):
+        """添加一個新的障礙物，避免放在蛇的正前方"""
+        head = snake.get_head_position()
+        direction = snake.direction
+        
+        # 計算蛇頭前方的三個格子位置
+        danger_positions = set()
+        x, y = head
+        dx, dy = direction
+        for i in range(3):  # 檢查前方 3 格
+            x = (x + dx) % GRID_WIDTH
+            y = (y + dy) % GRID_HEIGHT
+            danger_positions.add((x, y))
+            # 添加左右兩側的格子
+            danger_positions.add(((x + dy) % GRID_WIDTH, (y - dx) % GRID_HEIGHT))  # 左側
+            danger_positions.add(((x - dy) % GRID_WIDTH, (y + dx) % GRID_HEIGHT))  # 右側
+
+        # 嘗試放置新障礙物
+        attempts = 100  # 最大嘗試次數
+        while attempts > 0:
+            pos = (random.randint(0, GRID_WIDTH-1), 
+                  random.randint(0, GRID_HEIGHT-1))
+            
+            # 檢查是否符合所有條件：
+            # 1. 不在蛇身上
+            # 2. 不在其他障礙物上
+            # 3. 不在危險區域內
+            # 4. 不在食物上
+            if (pos not in snake.positions and 
+                pos not in self.positions and 
+                pos not in danger_positions):
+                self.positions.add(pos)
+                break
+            attempts -= 1
+
     def render(self):
         for pos in self.positions:
-            rect = pygame.Rect(pos[0] * GRID_SIZE + 2,  # 增加邊距
+            rect = pygame.Rect(pos[0] * GRID_SIZE + 2,
                              pos[1] * GRID_SIZE + 2,
-                             GRID_SIZE - 4, GRID_SIZE - 4)  # 減小實際大小
-            draw_rounded_rect(screen, self.color, rect, 10)  # 增加圓角半徑
+                             GRID_SIZE - 4, GRID_SIZE - 4)
+            draw_rounded_rect(screen, self.color, rect, 10)
 
 class Snake:
     def __init__(self):
@@ -252,7 +287,7 @@ def main():
                 if game_over:
                     if event.key == pygame.K_SPACE:
                         snake.reset()
-                        obstacles.generate_obstacles()
+                        obstacles.generate_obstacles(OBSTACLE_COUNT)  # 重置為初始數量
                         food.randomize_position()
                         game_over = False
                         if background_music:
@@ -276,9 +311,10 @@ def main():
             if snake.get_head_position() == food.position:
                 snake.length += 1
                 snake.score += 1
-                # 每得到 10 分增加速度
+                # 每得到 10 分增加速度和障礙物
                 if snake.score % 10 == 0:
                     snake.speed += SPEED_INCREMENT
+                    obstacles.add_obstacle(snake)  # 添加新障礙物
                 food.randomize_position()
                 if eat_sound:
                     eat_sound.play()
