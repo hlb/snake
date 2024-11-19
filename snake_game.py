@@ -59,11 +59,12 @@ OBSTACLE_COLOR = (97, 175, 239)
 # 遊戲設置
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
-GRID_SIZE = 20
+GRID_SIZE = 40
 GRID_WIDTH = WINDOW_WIDTH // GRID_SIZE
 GRID_HEIGHT = WINDOW_HEIGHT // GRID_SIZE
-SNAKE_SPEED = 10
-OBSTACLE_COUNT = 5  # 障礙物數量
+INITIAL_SPEED = 6  # 初始速度
+SPEED_INCREMENT = 1  # 每 10 分增加的速度
+OBSTACLE_COUNT = 3
 
 # 方向常量
 UP = (0, -1)
@@ -126,18 +127,26 @@ class Obstacle:
 
     def render(self):
         for pos in self.positions:
-            rect = pygame.Rect(pos[0] * GRID_SIZE + 1,
-                             pos[1] * GRID_SIZE + 1,
-                             GRID_SIZE - 2, GRID_SIZE - 2)
-            draw_rounded_rect(screen, self.color, rect, 3)
+            rect = pygame.Rect(pos[0] * GRID_SIZE + 2,  # 增加邊距
+                             pos[1] * GRID_SIZE + 2,
+                             GRID_SIZE - 4, GRID_SIZE - 4)  # 減小實際大小
+            draw_rounded_rect(screen, self.color, rect, 10)  # 增加圓角半徑
 
 class Snake:
     def __init__(self):
-        self.length = 1
+        self.length = 3  # 初始長度改為 3
         self.positions = [(GRID_WIDTH // 2, GRID_HEIGHT // 2)]
+        # 根據初始方向添加身體部分
         self.direction = random.choice([UP, DOWN, LEFT, RIGHT])
+        x, y = self.direction
+        for i in range(1, self.length):
+            self.positions.append((
+                (self.positions[0][0] - x * i) % GRID_WIDTH,
+                (self.positions[0][1] - y * i) % GRID_HEIGHT
+            ))
         self.color = SNAKE_COLOR
         self.score = 0
+        self.speed = INITIAL_SPEED  # 添加速度屬性
 
     def get_head_position(self):
         return self.positions[0]
@@ -165,16 +174,24 @@ class Snake:
         return True
 
     def reset(self):
-        self.length = 1
+        self.length = 3  # 重置時也是 3 格長度
         self.positions = [(GRID_WIDTH // 2, GRID_HEIGHT // 2)]
         self.direction = random.choice([UP, DOWN, LEFT, RIGHT])
+        x, y = self.direction
+        for i in range(1, self.length):
+            self.positions.append((
+                (self.positions[0][0] - x * i) % GRID_WIDTH,
+                (self.positions[0][1] - y * i) % GRID_HEIGHT
+            ))
         self.score = 0
+        self.speed = INITIAL_SPEED  # 重置速度
 
     def render(self):
         for i, p in enumerate(self.positions):
-            radius = 8 if i == 0 else 5  # 蛇頭較大
-            rect = pygame.Rect(p[0] * GRID_SIZE + 1, p[1] * GRID_SIZE + 1,
-                             GRID_SIZE - 2, GRID_SIZE - 2)
+            radius = 12 if i == 0 else 8  # 增加圓角半徑
+            rect = pygame.Rect(p[0] * GRID_SIZE + 2,  # 增加邊距
+                             p[1] * GRID_SIZE + 2,
+                             GRID_SIZE - 4, GRID_SIZE - 4)  # 減小實際大小
             draw_rounded_rect(screen, self.color, rect, radius)
 
 class Food:
@@ -193,10 +210,10 @@ class Food:
                 break
 
     def render(self):
-        rect = pygame.Rect(self.position[0] * GRID_SIZE + 1,
-                         self.position[1] * GRID_SIZE + 1,
-                         GRID_SIZE - 2, GRID_SIZE - 2)
-        draw_rounded_rect(screen, self.color, rect, 8)
+        rect = pygame.Rect(self.position[0] * GRID_SIZE + 2,  # 增加邊距
+                         self.position[1] * GRID_SIZE + 2,
+                         GRID_SIZE - 4, GRID_SIZE - 4)  # 減小實際大小
+        draw_rounded_rect(screen, self.color, rect, 12)  # 增加圓角半徑
 
 def show_game_over(screen, score):
     """顯示遊戲結束畫面"""
@@ -239,7 +256,7 @@ def main():
                         food.randomize_position()
                         game_over = False
                         if background_music:
-                            pygame.mixer.Channel(0).play(background_music, -1)
+                            pygame.mixer.Channel(0).play(background_music, loops=-1)
                 else:
                     if event.key == pygame.K_UP and snake.direction != DOWN:
                         snake.direction = UP
@@ -259,6 +276,9 @@ def main():
             if snake.get_head_position() == food.position:
                 snake.length += 1
                 snake.score += 1
+                # 每得到 10 分增加速度
+                if snake.score % 10 == 0:
+                    snake.speed += SPEED_INCREMENT
                 food.randomize_position()
                 if eat_sound:
                     eat_sound.play()
@@ -278,7 +298,7 @@ def main():
             show_game_over(screen, snake.score)
 
         pygame.display.update()
-        clock.tick(SNAKE_SPEED)
+        clock.tick(snake.speed)  # 使用蛇的當前速度
 
 if __name__ == '__main__':
     main()
