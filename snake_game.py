@@ -4,7 +4,6 @@ import sys
 import os
 from pygame import mixer
 from pygame_emojis import load_emoji
-from PIL import Image, ImageDraw, ImageFont
 
 # 初始化 Pygame
 pygame.init()
