@@ -3,6 +3,8 @@ import random
 import sys
 import os
 from pygame import mixer
+from pygame_emojis import load_emoji
+from PIL import Image, ImageDraw, ImageFont
 
 # 初始化 Pygame
 pygame.init()
@@ -232,8 +234,11 @@ class Snake:
 class Food:
     def __init__(self, obstacles):
         self.position = (0, 0)
-        self.color = FOOD_COLOR
         self.obstacles = obstacles
+        self.food_emojis = ['🍕', '🍇', '🍪', '🍓', '🍎', '🍮', '🍜']
+        self.emoji = random.choice(self.food_emojis)
+        # Load the emoji surface
+        self.emoji_surface = load_emoji(self.emoji, (GRID_SIZE - 4, GRID_SIZE - 4))
         self.randomize_position()
 
     def randomize_position(self):
@@ -242,13 +247,17 @@ class Food:
                            random.randint(0, GRID_HEIGHT-1))
             # 確保食物不會出現在障礙物上
             if self.position not in self.obstacles.positions:
+                # Change to a new random food emoji
+                self.emoji = random.choice(self.food_emojis)
+                self.emoji_surface = load_emoji(self.emoji, (GRID_SIZE - 4, GRID_SIZE - 4))
                 break
 
     def render(self):
-        rect = pygame.Rect(self.position[0] * GRID_SIZE + 2,  # 增加邊距
-                         self.position[1] * GRID_SIZE + 2,
-                         GRID_SIZE - 4, GRID_SIZE - 4)  # 減小實際大小
-        draw_rounded_rect(screen, self.color, rect, 12)  # 增加圓角半徑
+        x = self.position[0] * GRID_SIZE
+        y = self.position[1] * GRID_SIZE
+        # Center the emoji in the grid cell
+        rect = self.emoji_surface.get_rect(center=(x + GRID_SIZE//2, y + GRID_SIZE//2))
+        screen.blit(self.emoji_surface, rect)
 
 def show_game_over(screen, score):
     """顯示遊戲結束畫面"""
