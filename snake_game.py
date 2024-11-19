@@ -170,71 +170,101 @@ class Obstacle:
 
 class Snake:
     def __init__(self):
-        self.length = 3  # 初始長度改為 3
-        self.positions = [(GRID_WIDTH // 2, GRID_HEIGHT // 2)]
-        # 根據初始方向添加身體部分
+        """Initialize a new snake with default settings."""
+        self.score = 0
+        self.speed = INITIAL_SPEED
+        self.color = SNAKE_COLOR
+        self._initialize_snake()
+    
+    def _initialize_snake(self):
+        """Initialize or reset snake's position and length."""
+        self.length = 3
         self.direction = random.choice([UP, DOWN, LEFT, RIGHT])
-        x, y = self.direction
+        # Start at center
+        center = (GRID_WIDTH // 2, GRID_HEIGHT // 2)
+        self.positions = [center]
+        # Add body segments behind head based on direction
+        dx, dy = self.direction
         for i in range(1, self.length):
             self.positions.append((
-                (self.positions[0][0] - x * i) % GRID_WIDTH,
-                (self.positions[0][1] - y * i) % GRID_HEIGHT
+                (center[0] - dx * i) % GRID_WIDTH,
+                (center[1] - dy * i) % GRID_HEIGHT
             ))
-        self.color = SNAKE_COLOR
-        self.score = 0
-        self.speed = INITIAL_SPEED  # 添加速度屬性
 
     def get_head_position(self):
+        """Return the position of snake's head."""
         return self.positions[0]
 
-    def update(self, obstacles):
-        cur = self.get_head_position()
-        x, y = self.direction
-        new = ((cur[0] + x) % GRID_WIDTH, (cur[1] + y) % GRID_HEIGHT)
+    def _check_collision(self, new_pos, obstacles):
+        """Check if the new position results in a collision.
         
-        # 檢查是否撞到障礙物
-        if new in obstacles.positions:
+        Args:
+            new_pos: Tuple of (x, y) for the new head position
+            obstacles: Obstacle object containing obstacle positions
+            
+        Returns:
+            bool: True if collision detected, False otherwise
+        """
+        # Check obstacle collision
+        if new_pos in obstacles.positions:
             if crash_sound:
                 crash_sound.play()
-            return True  # Return True for collision
+            return True
+            
+        # Check self collision (excluding head)
+        if new_pos in self.positions[1:]:
+            if crash_sound:
+                crash_sound.play()
+            return True
+            
+        return False
+
+    def update(self, obstacles):
+        """Update snake position and check for collisions.
         
-        # Update length based on score before moving
+        Args:
+            obstacles: Obstacle object containing obstacle positions
+            
+        Returns:
+            bool: True if collision occurred, False otherwise
+        """
+        # Calculate new head position
+        cur = self.get_head_position()
+        dx, dy = self.direction
+        new_pos = ((cur[0] + dx) % GRID_WIDTH, (cur[1] + dy) % GRID_HEIGHT)
+        
+        # Check for collisions
+        if self._check_collision(new_pos, obstacles):
+            return True
+        
+        # Update snake length based on score
         self.length = 3 + self.score
         
-        # Add new head position
-        self.positions.insert(0, new)
+        # Move snake by adding new head
+        self.positions.insert(0, new_pos)
         
-        # Only remove tail if we haven't grown
+        # Remove tail if we haven't grown
         if len(self.positions) > self.length:
             self.positions.pop()
-        
-        # 檢查是否撞到自己 (檢查所有身體部分，除了頭部)
-        if new in self.positions[1:]:
-            if crash_sound:
-                crash_sound.play()
-            return True  # Return True for collision
             
-        return False  # Return False for no collision
+        return False
 
     def reset(self):
-        self.length = 3  # 重置時也是 3 格長度
-        self.positions = [(GRID_WIDTH // 2, GRID_HEIGHT // 2)]
-        self.direction = random.choice([UP, DOWN, LEFT, RIGHT])
-        x, y = self.direction
-        for i in range(1, self.length):
-            self.positions.append((
-                (self.positions[0][0] - x * i) % GRID_WIDTH,
-                (self.positions[0][1] - y * i) % GRID_HEIGHT
-            ))
+        """Reset snake to initial state."""
         self.score = 0
-        self.speed = INITIAL_SPEED  # 重置速度
+        self.speed = INITIAL_SPEED
+        self._initialize_snake()
 
     def render(self):
-        for i, p in enumerate(self.positions):
-            radius = 12 if i == 0 else 8  # 增加圓角半徑
-            rect = pygame.Rect(p[0] * GRID_SIZE + 2,  # 增加邊距
-                             p[1] * GRID_SIZE + 2,
-                             GRID_SIZE - 4, GRID_SIZE - 4)  # 減小實際大小
+        """Render the snake on the screen."""
+        for i, pos in enumerate(self.positions):
+            radius = 12 if i == 0 else 8  # Larger radius for head
+            rect = pygame.Rect(
+                pos[0] * GRID_SIZE + 2,
+                pos[1] * GRID_SIZE + 2,
+                GRID_SIZE - 4, 
+                GRID_SIZE - 4
+            )
             draw_rounded_rect(screen, self.color, rect, radius)
 
 class Food:
