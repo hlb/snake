@@ -1,38 +1,38 @@
-# Python 貪食蛇遊戲
+# Python Snake Game
 
-一個使用 Python 和 Pygame 製作的現代風格貪食蛇遊戲。
+A modern-style Snake game created with Python and Pygame.
 
-## 功能特色
+## Features
 
-- 現代化的視覺設計
-- 圓角蛇身和食物
-- 背景網格
-- 遊戲結束畫面
-- 即時分數顯示
+- Modern visual design
+- Rounded snake body and food
+- Background grid
+- Game over screen
+- Real-time score display
 
-## 安裝需求
+## Installation Requirements
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## 如何運行
+## How to Run
 
 ```bash
 python snake_game.py
 ```
 
-## 遊戲控制
+## Game Controls
 
-- ↑ 向上移動
-- ↓ 向下移動
-- ← 向左移動
-- → 向右移動
-- 空格鍵 - 遊戲結束時重新開始
+- ↑ Move up
+- ↓ Move down
+- ← Move left
+- → Move right
+- Space - Restart when game is over
 
-## 遊戲規則
+## Game Rules
 
-1. 使用方向鍵控制蛇的移動
-2. 吃到食物可以增加分數和蛇的長度
-3. 撞到自己會結束遊戲
-4. 可以穿過邊界到達對面
+1. Use arrow keys to control snake movement
+2. Eating food increases score and snake length
+3. Hitting yourself ends the game
+4. Can pass through boundaries to reach the opposite side
