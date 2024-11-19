@@ -196,18 +196,25 @@ class Snake:
         if new in obstacles.positions:
             if crash_sound:
                 crash_sound.play()
-            return False
+            return True  # Return True for collision
         
-        # 檢查是否撞到自己
-        if new in self.positions[3:]:
+        # 檢查是否撞到自己 (檢查所有身體部分)
+        if new in self.positions[1:]:
             if crash_sound:
                 crash_sound.play()
-            return False
+            return True  # Return True for collision
             
+        # Update length based on score before moving
+        self.length = 3 + self.score
+        
+        # Add new head position
         self.positions.insert(0, new)
+        
+        # Only remove tail if we haven't grown
         if len(self.positions) > self.length:
             self.positions.pop()
-        return True
+            
+        return False  # Return False for no collision
 
     def reset(self):
         self.length = 3  # 重置時也是 3 格長度
