@@ -198,12 +198,6 @@ class Snake:
                 crash_sound.play()
             return True  # Return True for collision
         
-        # 檢查是否撞到自己 (檢查所有身體部分)
-        if new in self.positions[1:]:
-            if crash_sound:
-                crash_sound.play()
-            return True  # Return True for collision
-            
         # Update length based on score before moving
         self.length = 3 + self.score
         
@@ -213,6 +207,12 @@ class Snake:
         # Only remove tail if we haven't grown
         if len(self.positions) > self.length:
             self.positions.pop()
+        
+        # 檢查是否撞到自己 (檢查所有身體部分，除了頭部)
+        if new in self.positions[1:]:
+            if crash_sound:
+                crash_sound.play()
+            return True  # Return True for collision
             
         return False  # Return False for no collision
 
@@ -318,7 +318,7 @@ def main():
                         snake.direction = RIGHT
 
         if not game_over:
-            if not snake.update(obstacles):
+            if snake.update(obstacles):  # Removed the 'not' operator
                 game_over = True
                 if background_music:
                     background_music.stop()

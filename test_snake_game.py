@@ -89,6 +89,52 @@ class TestSnakeGame(unittest.TestCase):
         # Test that snake grew
         self.assertEqual(len(snake.positions), initial_length + 1)
 
+    def test_snake_no_collision_on_start(self):
+        """Test that snake doesn't collide with anything when game starts"""
+        snake = Snake()
+        # Test initial movement without any obstacles
+        self.assertFalse(snake.update(Obstacle()))
+        
+    def test_snake_valid_movement_sequence(self):
+        """Test that snake can move freely without collisions in valid scenarios"""
+        snake = Snake()
+        obstacles = Obstacle()
+        # Clear any random obstacles to ensure clean test
+        obstacles.positions.clear()
+        
+        # Set initial position and direction
+        snake.positions = [(5, 5), (4, 5), (3, 5)]  # Snake facing right
+        
+        # Move snake in a square pattern
+        movements = [RIGHT, DOWN, LEFT, UP]
+        for direction in movements:
+            snake.direction = direction
+            # Should return False for no collision
+            self.assertFalse(snake.update(obstacles))
+            
+    def test_snake_collision_detection_accuracy(self):
+        """Test that collision detection works accurately in various scenarios"""
+        snake = Snake()
+        obstacles = Obstacle()
+        obstacles.positions.clear()  # Clear random obstacles
+        
+        # Test case 1: No collision when moving in empty space
+        snake.positions = [(5, 5), (4, 5), (3, 5)]  # Snake facing right
+        snake.direction = RIGHT
+        self.assertFalse(snake.update(obstacles))
+        
+        # Test case 2: Collision with obstacle directly in front
+        snake.positions = [(5, 5), (4, 5), (3, 5)]  # Reset position
+        obstacles.positions.add((6, 5))  # Place obstacle in front
+        snake.direction = RIGHT
+        self.assertTrue(snake.update(obstacles))
+        
+        # Test case 3: Collision with own body when turning back
+        snake.positions = [(5, 5), (4, 5), (3, 5)]  # Reset position
+        obstacles.positions.clear()  # Clear obstacles
+        snake.direction = LEFT  # Turn back into body
+        self.assertTrue(snake.update(obstacles))
+
     def tearDown(self):
         pygame.quit()
 
