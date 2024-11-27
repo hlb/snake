@@ -59,7 +59,42 @@ python snake_game.py
 3. Hitting yourself ends the game
 4. Can pass through boundaries to reach the opposite side
 
-## Running Tests
+## Testing
 
+The game includes a comprehensive test suite organized into unit and integration tests:
+
+### Test Structure
+```
+tests/
+├── base_test.py         # Base test class with common utilities
+├── unit/               # Component-specific unit tests
+│   ├── test_snake.py   # Snake movement and collision tests
+│   ├── test_food.py    # Food generation and effects tests
+│   └── test_obstacle.py # Obstacle placement and collision tests
+└── integration/        # Integration tests
+    ├── test_game_mechanics.py  # Game state and mechanics tests
+    └── test_ui.py      # UI rendering tests
+```
+
+### Running Tests
+
+Run all tests with:
 ```bash
-python -m unittest test_snake_game.py -v
+python -m unittest discover tests -v
+```
+
+Run specific test files:
+```bash
+python -m unittest tests/unit/test_snake.py -v
+python -m unittest tests/unit/test_food.py -v
+python -m unittest tests/integration/test_game_mechanics.py -v
+```
+
+### Test Coverage
+
+The test suite covers:
+- Snake movement and collision detection
+- Food placement and effects
+- Game mechanics (direction changes, state updates)
+- UI rendering and score display
+- Integration between game components
