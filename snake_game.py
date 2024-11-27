@@ -69,11 +69,33 @@ def show_game_over(screen, score):
     
     pygame.display.flip()
 
+def show_start_menu(screen):
+    """Show start menu screen"""
+    screen.fill(BACKGROUND)
+    draw_grid(screen)
+    
+    # Title
+    font = get_font(64)
+    title = font.render('Snake Game', True, GAME_OVER_COLOR)
+    title_rect = title.get_rect()
+    title_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 50)
+    screen.blit(title, title_rect)
+    
+    # Start instruction
+    font = get_font(32)
+    instruction = font.render('Press ENTER to Start', True, SCORE_COLOR)
+    instruction_rect = instruction.get_rect()
+    instruction_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 50)
+    screen.blit(instruction, instruction_rect)
+    
+    pygame.display.flip()
+
 def main():
     snake = Snake()
     obstacles = Obstacle()
     food = Food(obstacles)
     game_over = False
+    game_started = False
     
     while True:
         for event in pygame.event.get():
@@ -81,7 +103,11 @@ def main():
                 pygame.quit()
                 return
             elif event.type == pygame.KEYDOWN:
-                if game_over:
+                if not game_started:
+                    if event.key == pygame.K_RETURN:  # Enter key
+                        game_started = True
+                        continue
+                elif game_over:
                     if event.key == pygame.K_SPACE:
                         # Reset game
                         snake = Snake()
@@ -102,6 +128,10 @@ def main():
                     elif event.key == pygame.K_RIGHT and snake.direction != (-1, 0):
                         snake.direction = (1, 0)
         
+        if not game_started:
+            show_start_menu(screen)
+            continue
+            
         if not game_over:
             # Update snake position
             collision = snake.update(obstacles)

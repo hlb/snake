@@ -138,6 +138,74 @@ class TestSnakeGame(unittest.TestCase):
         snake.direction = LEFT  # Turn back into body
         self.assertTrue(snake.update(obstacles))
 
+    def test_start_menu_rendering(self):
+        """Test that start menu renders correctly"""
+        from snake_game import show_start_menu
+        
+        # Create a test surface
+        test_surface = pygame.Surface((800, 600))
+        
+        # Should not raise any exceptions
+        try:
+            show_start_menu(test_surface)
+            rendered = True
+        except Exception as e:
+            rendered = False
+        
+        self.assertTrue(rendered, "Start menu should render without errors")
+        
+        # Test that the surface has been modified (not empty/black)
+        self.assertGreater(
+            pygame.transform.average_color(test_surface)[0], 0,
+            "Start menu should render content on the surface"
+        )
+
+    def test_game_state_transitions(self):
+        """Test game state transitions from menu to game"""
+        from snake_game import main
+        
+        # Create a mock event for RETURN key press
+        start_event = pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_RETURN})
+        pygame.event.post(start_event)
+        
+        # Create a mock event for game quit
+        quit_event = pygame.event.Event(pygame.QUIT)
+        pygame.event.post(quit_event)
+        
+        # Should not raise any exceptions
+        try:
+            main()  # Will exit immediately due to quit event
+            transitioned = True
+        except Exception as e:
+            transitioned = False
+        
+        self.assertTrue(transitioned, "Game should handle state transitions without errors")
+
+    def test_key_event_handling(self):
+        """Test that key events are handled correctly in different game states"""
+        from snake_game import main
+        
+        # Test sequence of events
+        test_events = [
+            pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_RETURN}),  # Start game
+            pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_UP}),      # Move up
+            pygame.event.Event(pygame.KEYDOWN, {'key': pygame.K_SPACE}),   # Restart
+            pygame.event.Event(pygame.QUIT)                                # Quit
+        ]
+        
+        # Post all test events
+        for event in test_events:
+            pygame.event.post(event)
+        
+        # Should handle all events without errors
+        try:
+            main()  # Will exit due to quit event
+            handled = True
+        except Exception as e:
+            handled = False
+        
+        self.assertTrue(handled, "Game should handle all key events correctly")
+
     def tearDown(self):
         pygame.quit()
 

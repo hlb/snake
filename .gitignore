@@ -34,3 +34,8 @@ var/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Virtual Environment
+venv/
+.venv/
+ENV/
