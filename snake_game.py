@@ -102,74 +102,79 @@ def main():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
-            elif event.type == pygame.KEYDOWN:
-                if not game_started:
-                    if event.key == pygame.K_RETURN:  # Enter key
-                        game_started = True
-                        continue
-                elif game_over:
-                    if event.key == pygame.K_SPACE:
-                        # Reset game
-                        snake = Snake()
-                        obstacles = Obstacle()
-                        food = Food(obstacles)
-                        game_over = False
-                        continue
-                    elif event.key == pygame.K_q:
-                        pygame.quit()
-                        return
-                else:
-                    if event.key == pygame.K_UP and snake.direction != (0, 1):
-                        snake.direction = (0, -1)
-                    elif event.key == pygame.K_DOWN and snake.direction != (0, -1):
-                        snake.direction = (0, 1)
-                    elif event.key == pygame.K_LEFT and snake.direction != (1, 0):
-                        snake.direction = (-1, 0)
-                    elif event.key == pygame.K_RIGHT and snake.direction != (-1, 0):
-                        snake.direction = (1, 0)
+            
+            if event.type != pygame.KEYDOWN:
+                continue
+            
+            if not game_started and event.key == pygame.K_RETURN:
+                game_started = True
+                continue
+            
+            if game_over:
+                if event.key == pygame.K_SPACE:
+                    snake, obstacles, food = reset_game()
+                    game_over = False
+                elif event.key == pygame.K_q:
+                    pygame.quit()
+                    return
+            elif game_started:
+                handle_direction_change(event.key, snake)
         
         if not game_started:
             show_start_menu(screen)
             continue
             
         if not game_over:
-            # Update snake position
-            collision = snake.update(obstacles)
-            if collision:
-                if crash_sound:
-                    crash_sound.play()
-                game_over = True
-                continue
-            
-            # Check if snake ate food
-            if snake.get_head_position() == food.position:
-                if eat_sound:
-                    eat_sound.play()
-                snake.length += 1
-                snake.handle_food_effect(food)  # Handle special food effects
-                food.randomize_position()
-                # Add new obstacle every 10 points
-                if snake.score % 10 == 0:
-                    obstacles.add_obstacle(snake)
-                    snake.speed += 1  # Increase speed
+            game_over = update_game_state(snake, obstacles, food)
         
-        # Draw everything
-        screen.fill(BACKGROUND)
-        draw_grid(screen)
-        snake.render(screen)
-        food.render(screen)
-        obstacles.render(screen)
-        
-        # Draw score
-        font = get_font(24)
-        score_text = font.render(f'Score: {snake.score}', True, SCORE_COLOR)
-        screen.blit(score_text, (10, 10))
-        
-        if game_over:
-            show_game_over(screen, snake.score)
+        render_game(screen, snake, food, obstacles, game_over)
         
         pygame.display.flip()
         clock.tick(snake.speed)
+
+def reset_game():
+    return Snake(), Obstacle(), Food(Obstacle())
+
+def handle_direction_change(key, snake):
+    directions = {
+        pygame.K_UP: ((0, -1), (0, 1)),
+        pygame.K_DOWN: ((0, 1), (0, -1)),
+        pygame.K_LEFT: ((-1, 0), (1, 0)),
+        pygame.K_RIGHT: ((1, 0), (-1, 0))
+    }
+    if key in directions and snake.direction != directions[key][1]:
+        snake.direction = directions[key][0]
+
+def update_game_state(snake, obstacles, food):
+    if snake.update(obstacles):
+        if crash_sound:
+            crash_sound.play()
+        return True
+    
+    if snake.get_head_position() == food.position:
+        if eat_sound:
+            eat_sound.play()
+        snake.length += 1
+        snake.handle_food_effect(food)
+        food.randomize_position()
+        if snake.score % 10 == 0:
+            obstacles.add_obstacle(snake)
+            snake.speed += 1
+    return False
+
+def render_game(screen, snake, food, obstacles, game_over):
+    screen.fill(BACKGROUND)
+    draw_grid(screen)
+    snake.render(screen)
+    food.render(screen)
+    obstacles.render(screen)
+    
+    font = get_font(24)
+    score_text = font.render(f'Score: {snake.score}', True, SCORE_COLOR)
+    screen.blit(score_text, (10, 10))
+    
+    if game_over:
+        show_game_over(screen, snake.score)
 
 if __name__ == '__main__':
     main()

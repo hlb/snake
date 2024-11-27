@@ -4,6 +4,9 @@ from src import (
     Snake, Food, Obstacle,
     GRID_WIDTH, GRID_HEIGHT, UP, DOWN, LEFT, RIGHT
 )
+from snake_game import (
+    reset_game, handle_direction_change, update_game_state
+)
 
 class TestSnakeGame(unittest.TestCase):
     def setUp(self):
@@ -286,6 +289,83 @@ class TestSnakeGame(unittest.TestCase):
         
         # Test that speed returned to normal
         self.assertEqual(snake.speed, initial_speed)
+
+    def test_game_reset(self):
+        """Test that game reset function properly initializes all components"""
+        snake, obstacles, food = reset_game()
+        
+        # Test snake initialization
+        self.assertIsInstance(snake, Snake)
+        self.assertEqual(len(snake.positions), 3)
+        self.assertEqual(snake.score, 0)
+        
+        # Test obstacles initialization
+        self.assertIsInstance(obstacles, Obstacle)
+        self.assertTrue(len(obstacles.positions) > 0)
+        
+        # Test food initialization
+        self.assertIsInstance(food, Food)
+        self.assertTrue(0 <= food.position[0] < GRID_WIDTH)
+        self.assertTrue(0 <= food.position[1] < GRID_HEIGHT)
+
+    def test_direction_change_handling(self):
+        """Test that direction changes are handled correctly"""
+        snake = Snake()
+        original_direction = snake.direction
+        
+        # Test valid direction change
+        if original_direction != (0, 1):  # If not moving down
+            handle_direction_change(pygame.K_UP, snake)
+            self.assertEqual(snake.direction, (0, -1))
+        
+        # Test invalid direction change (trying to move in opposite direction)
+        current_direction = snake.direction
+        invalid_directions = {
+            (0, -1): pygame.K_DOWN,   # UP -> DOWN
+            (0, 1): pygame.K_UP,      # DOWN -> UP
+            (-1, 0): pygame.K_RIGHT,  # LEFT -> RIGHT
+            (1, 0): pygame.K_LEFT     # RIGHT -> LEFT
+        }
+        if current_direction in invalid_directions:
+            handle_direction_change(invalid_directions[current_direction], snake)
+            self.assertEqual(snake.direction, current_direction)
+
+    def test_update_game_state(self):
+        """Test that game state updates correctly"""
+        snake = Snake()
+        obstacles = Obstacle()
+        food = Food(obstacles)
+        
+        # Test normal movement (no collision)
+        snake.positions = [(5, 5), (4, 5), (3, 5)]
+        snake.direction = (1, 0)  # Moving right
+        obstacles.positions = {(7, 5)}  # Obstacle away from snake
+        food.position = (8, 5)    # Food away from snake
+        
+        game_over = update_game_state(snake, obstacles, food)
+        self.assertFalse(game_over)
+        
+        # Test collision with obstacle
+        snake.positions = [(6, 5), (5, 5), (4, 5)]
+        snake.direction = (1, 0)  # Moving right
+        obstacles.positions = {(7, 5)}  # Obstacle in snake's path
+        
+        game_over = update_game_state(snake, obstacles, food)
+        self.assertTrue(game_over)
+        
+        # Test eating food
+        snake = Snake()
+        initial_length = snake.length
+        initial_score = snake.score
+        snake.positions = [(4, 5), (3, 5), (2, 5)]
+        snake.direction = (1, 0)  # Moving right
+        food.position = (5, 5)    # Food in snake's path
+        obstacles.positions = {(7, 5)}  # Obstacle away from snake
+        
+        game_over = update_game_state(snake, obstacles, food)
+        self.assertFalse(game_over)
+        self.assertGreater(snake.length, initial_length)
+        self.assertGreater(snake.score, initial_score)
 
     def tearDown(self):
         pygame.quit()
