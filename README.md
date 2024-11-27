@@ -1,100 +1,99 @@
-# Python Snake Game
+# Modern Python Snake Game
 
-A modern-style Snake game created with Python and Pygame.
+A modern take on the classic Snake game, built with Python and Pygame. Experience smooth animations, dynamic visuals, and engaging gameplay mechanics.
 
-## Features
+![Snake Game Screenshot](docs/screenshot.png)
 
-- Modern visual design with smooth animations
-- Rounded snake body and food with emoji graphics
-- Dynamic background grid
-- Game over screen with final score
-- Real-time score display
-- Sound effects for eating and game over
-- Boundary wrapping (snake can pass through walls)
-- Smooth controls with immediate response
+## Quick Start
 
-## Development Setup
-
-1. Create a virtual environment:
 ```bash
+# Clone the repository
+git clone https://github.com/yourusername/snake-game.git
+cd snake-game
+
+# Set up Python environment
 python -m venv venv
-```
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-2. Activate the virtual environment:
-```bash
-# On macOS/Linux:
-source venv/bin/activate
-
-# On Windows:
-venv\Scripts\activate
-```
-
-3. Install dependencies:
-```bash
+# Install dependencies
 pip install -r requirements.txt
-```
 
-## How to Run
-
-1. Make sure the virtual environment is activated
-2. Run the game:
-```bash
+# Launch the game
 python snake_game.py
 ```
 
-## Game Controls
+## Gameplay
 
-- Press ENTER to start the game
-- ↑ Move up
-- ↓ Move down
-- ← Move left
-- → Move right
-- Space - Restart when game is over
-- Q - Quit game
+### Controls
+| Key | Action |
+|-----|--------|
+| ENTER | Start game / Restart after game over |
+| ↑ | Move up |
+| ↓ | Move down |
+| ← | Move left |
+| → | Move right |
+| Q | Quit game |
 
-## Game Rules
+### Power-ups and Scoring
+The game features three types of collectible food items:
 
-1. Use arrow keys to control snake movement
-2. Eating food increases score and snake length
-3. Hitting yourself ends the game
-4. Can pass through boundaries to reach the opposite side
+- 🍎 **Normal Food**
+  - Basic food item
+  - Adds 1 point to score
+  - Increases snake length
 
-## Testing
+- ⭐ **Golden Food**
+  - Rare, valuable food
+  - Adds 2 points to score
+  - Increases snake length
 
-The game includes a comprehensive test suite organized into unit and integration tests:
+- 🚀 **Speed Food**
+  - Special power-up
+  - Temporarily boosts snake speed
+  - Adds 1 point to score
 
-### Test Structure
+### Game Mechanics
+- Snake wraps around screen edges for continuous gameplay
+- Colliding with obstacles or snake's body ends the game
+- Score increases with each food item collected
+- Background music and sound effects enhance the experience
+
+## Development
+
+### Prerequisites
+- Python 3.11 or higher
+- Pygame library
+- Virtual environment (recommended)
+
+### Project Structure
 ```
-tests/
-├── base_test.py         # Base test class with common utilities
-├── unit/               # Component-specific unit tests
-│   ├── test_snake.py   # Snake movement and collision tests
-│   ├── test_food.py    # Food generation and effects tests
-│   └── test_obstacle.py # Obstacle placement and collision tests
-└── integration/        # Integration tests
-    ├── test_game_mechanics.py  # Game state and mechanics tests
-    └── test_ui.py      # UI rendering tests
+snake/
+├── src/               # Source code
+├── tests/             # Test suite
+├── sounds/            # Audio files
+├── requirements.txt   # Dependencies
+└── README.md         # Documentation
 ```
 
 ### Running Tests
+The project includes comprehensive unit and integration tests:
 
-Run all tests with:
 ```bash
+# Run all tests
 python -m unittest discover tests -v
-```
 
-Run specific test files:
-```bash
+# Run specific test suite
 python -m unittest tests/unit/test_snake.py -v
-python -m unittest tests/unit/test_food.py -v
-python -m unittest tests/integration/test_game_mechanics.py -v
 ```
 
-### Test Coverage
-
-The test suite covers:
-- Snake movement and collision detection
-- Food placement and effects
-- Game mechanics (direction changes, state updates)
-- UI rendering and score display
-- Integration between game components
+Test suite organization:
+```
+tests/
+├── unit/             # Component tests
+│   ├── test_snake.py     # Snake behavior
+│   ├── test_food.py      # Food mechanics
+│   └── test_obstacle.py  # Obstacle system
+└── integration/      # System tests
+    ├── test_game_mechanics.py
+    └── test_ui.py
+```
