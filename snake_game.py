@@ -67,6 +67,12 @@ def show_game_over(screen, score):
     score_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 50)
     screen.blit(score_text, score_rect)
     
+    # Add restart message
+    restart_text = font.render('Press ENTER to Restart', True, SCORE_COLOR)
+    restart_rect = restart_text.get_rect()
+    restart_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 100)
+    screen.blit(restart_text, restart_rect)
+    
     pygame.display.flip()
 
 def show_start_menu(screen):
@@ -111,7 +117,7 @@ def main():
                 continue
             
             if game_over:
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_RETURN:
                     snake, obstacles, food = reset_game()
                     game_over = False
                 elif event.key == pygame.K_q:
