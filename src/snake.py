@@ -10,7 +10,9 @@ class Snake:
         """Initialize a new snake with default settings."""
         self.score = 0
         self.speed = 6  # Initial speed
+        self.base_speed = 6  # Keep track of base speed
         self.color = SNAKE_COLOR
+        self.effect_end_time = 0  # Track when speed effect ends
         self._initialize_snake()
     
     def _initialize_snake(self):
@@ -42,8 +44,26 @@ class Snake:
             return True
         return False
 
+    def handle_food_effect(self, food):
+        """Handle the effects of different food types."""
+        # Add points
+        self.score += food.properties['points']
+        
+        # Handle speed change
+        if food.properties['speed_change'] != 0:
+            self.base_speed = self.speed  # Store current base speed
+            self.speed += food.properties['speed_change']
+            if food.properties['duration'] > 0:
+                self.effect_end_time = pygame.time.get_ticks() + food.properties['duration']
+
     def update(self, obstacles):
         """Update snake position and check for collisions."""
+        # Check if speed effect should end
+        current_time = pygame.time.get_ticks()
+        if self.effect_end_time > 0 and current_time >= self.effect_end_time:
+            self.speed = self.base_speed
+            self.effect_end_time = 0
+        
         current = self.get_head_position()
         dx, dy = self.direction
         new_head = ((current[0] + dx) % GRID_WIDTH,
@@ -55,8 +75,7 @@ class Snake:
         
         # Move snake
         self.positions.insert(0, new_head)
-        # Only remove the tail if we haven't grown
-        if len(self.positions) > self.length + self.score:
+        if len(self.positions) > self.length:
             self.positions.pop()
         
         return False  # No collision

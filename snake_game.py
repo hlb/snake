@@ -146,7 +146,7 @@ def main():
                 if eat_sound:
                     eat_sound.play()
                 snake.length += 1
-                snake.score += 1
+                snake.handle_food_effect(food)  # Handle special food effects
                 food.randomize_position()
                 # Add new obstacle every 10 points
                 if snake.score % 10 == 0:

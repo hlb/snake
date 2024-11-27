@@ -12,6 +12,11 @@ SCORE_COLOR = (229, 192, 123)
 GAME_OVER_COLOR = (224, 108, 117)
 OBSTACLE_COLOR = (97, 175, 239)
 
+# Food colors
+NORMAL_FOOD_COLOR = FOOD_COLOR
+GOLDEN_APPLE_COLOR = (255, 215, 0)  # Gold color
+SPEED_FRUIT_COLOR = (138, 43, 226)  # Purple color
+
 # Game settings
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 600
@@ -21,6 +26,13 @@ GRID_HEIGHT = WINDOW_HEIGHT // GRID_SIZE
 INITIAL_SPEED = 6  # Initial speed
 SPEED_INCREMENT = 1  # Speed increase per 10 points
 OBSTACLE_COUNT = 3
+
+# Food types and their effects
+FOOD_TYPES = {
+    'normal': {'points': 1, 'speed_change': 0, 'duration': 0},
+    'golden': {'points': 2, 'speed_change': 0, 'duration': 0},
+    'speed': {'points': 1, 'speed_change': 2, 'duration': 5000}  # 5 seconds duration
+}
 
 # Direction constants
 UP = (0, -1)

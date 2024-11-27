@@ -84,11 +84,15 @@ class TestSnakeGame(unittest.TestCase):
         self.assertTrue(snake.update(self.obstacles))
 
     def test_snake_growth(self):
+        """Test that snake grows correctly when eating food"""
         snake = Snake()
+        food = Food(self.obstacles)
         initial_length = len(snake.positions)
+        
         # Simulate eating food
-        snake.score += 1
-        snake.update(self.obstacles)
+        snake.length += 1  # Increase length directly
+        snake.update(self.obstacles)  # Update to apply growth
+        
         # Test that snake grew
         self.assertEqual(len(snake.positions), initial_length + 1)
 
@@ -205,6 +209,83 @@ class TestSnakeGame(unittest.TestCase):
             handled = False
         
         self.assertTrue(handled, "Game should handle all key events correctly")
+
+    def test_food_types_and_properties(self):
+        """Test that food types are correctly initialized with proper properties"""
+        food = Food(self.obstacles)
+        
+        # Test that food type is one of the expected types
+        self.assertIn(food.type, ['normal', 'golden', 'speed'])
+        
+        # Test that food has correct properties based on type
+        self.assertIsNotNone(food.properties)
+        self.assertIn('points', food.properties)
+        self.assertIn('speed_change', food.properties)
+        self.assertIn('duration', food.properties)
+        
+        # Test that food has correct emoji based on type
+        self.assertIn(food.emoji, food.food_emojis[food.type])
+
+    def test_golden_apple_effect(self):
+        """Test that golden apple gives correct score"""
+        snake = Snake()
+        food = Food(self.obstacles)
+        
+        # Force food to be golden apple
+        food.type = 'golden'
+        food.properties = {'points': 2, 'speed_change': 0, 'duration': 0}
+        
+        # Simulate eating golden apple
+        initial_score = snake.score
+        snake.handle_food_effect(food)
+        
+        # Test score increase
+        self.assertEqual(snake.score, initial_score + 2)
+
+    def test_speed_fruit_effect(self):
+        """Test that speed fruit correctly affects snake speed"""
+        snake = Snake()
+        food = Food(self.obstacles)
+        
+        # Force food to be speed fruit
+        food.type = 'speed'
+        food.properties = {'points': 1, 'speed_change': 2, 'duration': 5000}
+        
+        # Record initial speed
+        initial_speed = snake.speed
+        
+        # Simulate eating speed fruit
+        snake.handle_food_effect(food)
+        
+        # Test immediate speed increase
+        self.assertEqual(snake.speed, initial_speed + 2)
+        
+        # Test that effect end time is set
+        self.assertGreater(snake.effect_end_time, pygame.time.get_ticks())
+
+    def test_speed_effect_expiration(self):
+        """Test that speed effect correctly expires"""
+        snake = Snake()
+        food = Food(self.obstacles)
+        
+        # Force food to be speed fruit with very short duration
+        food.type = 'speed'
+        food.properties = {'points': 1, 'speed_change': 2, 'duration': 100}
+        
+        # Record initial speed
+        initial_speed = snake.speed
+        
+        # Simulate eating speed fruit
+        snake.handle_food_effect(food)
+        
+        # Wait for effect to expire
+        pygame.time.wait(200)
+        
+        # Update snake to trigger effect expiration check
+        snake.update(self.obstacles)
+        
+        # Test that speed returned to normal
+        self.assertEqual(snake.speed, initial_speed)
 
     def tearDown(self):
         pygame.quit()
