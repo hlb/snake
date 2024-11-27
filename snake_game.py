@@ -146,20 +146,28 @@ def handle_direction_change(key, snake):
         snake.direction = directions[key][0]
 
 def update_game_state(snake, obstacles, food):
+    """Update game state and handle collisions."""
+    # Check for collision with obstacles or self
     if snake.update(obstacles):
         if crash_sound:
             crash_sound.play()
         return True
     
-    if snake.get_head_position() == food.position:
+    # Check for collision with any food
+    head_pos = snake.get_head_position()
+    food_properties = food.remove_food(head_pos)
+    
+    if food_properties:
         if eat_sound:
             eat_sound.play()
-        snake.length += 1
-        snake.handle_food_effect(food)
-        food.randomize_position()
+        snake.length += food_properties['points']
+        snake.handle_food_effect(food_properties)
+        
+        # Add new obstacle every 10 points
         if snake.score % 10 == 0:
             obstacles.add_obstacle(snake)
             snake.speed += 1
+    
     return False
 
 def render_game(screen, snake, food, obstacles, game_over):

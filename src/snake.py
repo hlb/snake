@@ -44,17 +44,17 @@ class Snake:
             return True
         return False
 
-    def handle_food_effect(self, food):
+    def handle_food_effect(self, food_properties):
         """Handle the effects of different food types."""
         # Add points
-        self.score += food.properties['points']
+        self.score += food_properties['points']
         
         # Handle speed change
-        if food.properties['speed_change'] != 0:
+        if food_properties['speed_change'] != 0:
             self.base_speed = self.speed  # Store current base speed
-            self.speed += food.properties['speed_change']
-            if food.properties['duration'] > 0:
-                self.effect_end_time = pygame.time.get_ticks() + food.properties['duration']
+            self.speed += food_properties['speed_change']
+            if food_properties['duration'] > 0:
+                self.effect_end_time = pygame.time.get_ticks() + food_properties['duration']
 
     def update(self, obstacles):
         """Update snake position and check for collisions."""

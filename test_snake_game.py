@@ -32,10 +32,15 @@ class TestSnakeGame(unittest.TestCase):
 
     def test_snake_movement(self):
         snake = Snake()
-        initial_head = snake.get_head_position()
+        # Set initial position and direction
+        snake.positions = [(10, 10)]
         snake.direction = RIGHT
+        initial_head = snake.get_head_position()
+        
+        # Move snake
         snake.update(self.obstacles)
         new_head = snake.get_head_position()
+        
         # Test horizontal movement
         self.assertEqual(new_head[0], (initial_head[0] + 1) % GRID_WIDTH)
         self.assertEqual(new_head[1], initial_head[1])
@@ -49,23 +54,97 @@ class TestSnakeGame(unittest.TestCase):
         self.assertTrue(snake.update(self.obstacles))
 
     def test_food_initialization(self):
+        """Test that food is initialized correctly."""
         food = Food(self.obstacles)
-        # Test that food position is within grid
-        self.assertTrue(0 <= food.position[0] < GRID_WIDTH)
-        self.assertTrue(0 <= food.position[1] < GRID_HEIGHT)
-        # Test that food has an emoji
-        self.assertTrue(hasattr(food, 'emoji'))
-        self.assertTrue(hasattr(food, 'emoji_surface'))
+        self.assertEqual(len(food.foods), 3)  # Default max_foods is 3
+        for food_item in food.foods:
+            self.assertTrue(0 <= food_item.position[0] < GRID_WIDTH)
+            self.assertTrue(0 <= food_item.position[1] < GRID_HEIGHT)
+            self.assertNotIn(food_item.position, self.obstacles.positions)
 
     def test_food_randomize_position(self):
+        """Test that food position can be randomized."""
+        food = Food(self.obstacles, max_foods=1)
+        initial_pos = food.foods[0].position
+        
+        # Add obstacle at current food position
+        self.obstacles.positions.add(initial_pos)
+        
+        # Create new food, should be in different position
+        new_food = Food(self.obstacles, max_foods=1)
+        self.assertNotEqual(initial_pos, new_food.foods[0].position)
+
+    def test_food_types_and_properties(self):
+        """Test that food types are correctly initialized with proper properties"""
         food = Food(self.obstacles)
-        initial_pos = food.position
-        initial_emoji = food.emoji
-        food.randomize_position()
-        # Test that either position or emoji has changed
-        different_pos = initial_pos != food.position
-        different_emoji = initial_emoji != food.emoji
-        self.assertTrue(different_pos or different_emoji)
+        for food_item in food.foods:
+            self.assertIn(food_item.type, ['normal', 'golden', 'speed'])
+            self.assertIsNotNone(food_item.properties)
+            self.assertIn('points', food_item.properties)
+            self.assertIn('speed_change', food_item.properties)
+            self.assertIn('duration', food_item.properties)
+
+    def test_golden_apple_effect(self):
+        """Test that golden apple gives correct score"""
+        snake = Snake()
+        food = Food(self.obstacles)
+        
+        # Create a golden apple
+        golden_properties = {
+            'points': 2,
+            'speed_change': 0,
+            'duration': 0
+        }
+        
+        # Apply effect
+        initial_score = snake.score
+        snake.handle_food_effect(golden_properties)
+        
+        # Check that score increased by 2
+        self.assertEqual(snake.score, initial_score + 2)
+
+    def test_speed_fruit_effect(self):
+        """Test that speed fruit correctly affects snake speed"""
+        snake = Snake()
+        initial_speed = snake.speed
+        
+        # Create speed fruit properties
+        speed_properties = {
+            'points': 1,
+            'speed_change': 2,
+            'duration': 5000
+        }
+        
+        # Apply effect
+        snake.handle_food_effect(speed_properties)
+        
+        # Check that speed increased
+        self.assertEqual(snake.speed, initial_speed + 2)
+        self.assertTrue(snake.effect_end_time > 0)
+
+    def test_speed_effect_expiration(self):
+        """Test that speed effect correctly expires"""
+        snake = Snake()
+        initial_speed = snake.speed
+        
+        # Create speed fruit properties with very short duration
+        speed_properties = {
+            'points': 1,
+            'speed_change': 2,
+            'duration': 1  # 1ms duration
+        }
+        
+        # Apply effect
+        snake.handle_food_effect(speed_properties)
+        
+        # Wait for effect to expire
+        pygame.time.wait(10)  # Wait 10ms
+        
+        # Update to trigger effect expiration
+        snake.update(self.obstacles)
+        
+        # Test that speed returned to normal
+        self.assertEqual(snake.speed, initial_speed)
 
     def test_obstacle_initialization(self):
         obstacles = Obstacle()
@@ -213,83 +292,6 @@ class TestSnakeGame(unittest.TestCase):
         
         self.assertTrue(handled, "Game should handle all key events correctly")
 
-    def test_food_types_and_properties(self):
-        """Test that food types are correctly initialized with proper properties"""
-        food = Food(self.obstacles)
-        
-        # Test that food type is one of the expected types
-        self.assertIn(food.type, ['normal', 'golden', 'speed'])
-        
-        # Test that food has correct properties based on type
-        self.assertIsNotNone(food.properties)
-        self.assertIn('points', food.properties)
-        self.assertIn('speed_change', food.properties)
-        self.assertIn('duration', food.properties)
-        
-        # Test that food has correct emoji based on type
-        self.assertIn(food.emoji, food.food_emojis[food.type])
-
-    def test_golden_apple_effect(self):
-        """Test that golden apple gives correct score"""
-        snake = Snake()
-        food = Food(self.obstacles)
-        
-        # Force food to be golden apple
-        food.type = 'golden'
-        food.properties = {'points': 2, 'speed_change': 0, 'duration': 0}
-        
-        # Simulate eating golden apple
-        initial_score = snake.score
-        snake.handle_food_effect(food)
-        
-        # Test score increase
-        self.assertEqual(snake.score, initial_score + 2)
-
-    def test_speed_fruit_effect(self):
-        """Test that speed fruit correctly affects snake speed"""
-        snake = Snake()
-        food = Food(self.obstacles)
-        
-        # Force food to be speed fruit
-        food.type = 'speed'
-        food.properties = {'points': 1, 'speed_change': 2, 'duration': 5000}
-        
-        # Record initial speed
-        initial_speed = snake.speed
-        
-        # Simulate eating speed fruit
-        snake.handle_food_effect(food)
-        
-        # Test immediate speed increase
-        self.assertEqual(snake.speed, initial_speed + 2)
-        
-        # Test that effect end time is set
-        self.assertGreater(snake.effect_end_time, pygame.time.get_ticks())
-
-    def test_speed_effect_expiration(self):
-        """Test that speed effect correctly expires"""
-        snake = Snake()
-        food = Food(self.obstacles)
-        
-        # Force food to be speed fruit with very short duration
-        food.type = 'speed'
-        food.properties = {'points': 1, 'speed_change': 2, 'duration': 100}
-        
-        # Record initial speed
-        initial_speed = snake.speed
-        
-        # Simulate eating speed fruit
-        snake.handle_food_effect(food)
-        
-        # Wait for effect to expire
-        pygame.time.wait(200)
-        
-        # Update snake to trigger effect expiration check
-        snake.update(self.obstacles)
-        
-        # Test that speed returned to normal
-        self.assertEqual(snake.speed, initial_speed)
-
     def test_game_reset(self):
         """Test that game reset function properly initializes all components"""
         snake, obstacles, food = reset_game()
@@ -305,8 +307,10 @@ class TestSnakeGame(unittest.TestCase):
         
         # Test food initialization
         self.assertIsInstance(food, Food)
-        self.assertTrue(0 <= food.position[0] < GRID_WIDTH)
-        self.assertTrue(0 <= food.position[1] < GRID_HEIGHT)
+        self.assertEqual(len(food.foods), 3)  # Default max_foods is 3
+        for food_item in food.foods:
+            self.assertTrue(0 <= food_item.position[0] < GRID_WIDTH)
+            self.assertTrue(0 <= food_item.position[1] < GRID_HEIGHT)
 
     def test_direction_change_handling(self):
         """Test that direction changes are handled correctly"""
@@ -334,13 +338,13 @@ class TestSnakeGame(unittest.TestCase):
         """Test that game state updates correctly"""
         snake = Snake()
         obstacles = Obstacle()
-        food = Food(obstacles)
+        food = Food(obstacles, max_foods=1)  # Use single food for simpler testing
         
         # Test normal movement (no collision)
         snake.positions = [(5, 5), (4, 5), (3, 5)]
         snake.direction = (1, 0)  # Moving right
         obstacles.positions = {(7, 5)}  # Obstacle away from snake
-        food.position = (8, 5)    # Food away from snake
+        food.foods[0] = food._create_food_item((8, 5))  # Food away from snake
         
         game_over = update_game_state(snake, obstacles, food)
         self.assertFalse(game_over)
@@ -359,13 +363,69 @@ class TestSnakeGame(unittest.TestCase):
         initial_score = snake.score
         snake.positions = [(4, 5), (3, 5), (2, 5)]
         snake.direction = (1, 0)  # Moving right
-        food.position = (5, 5)    # Food in snake's path
+        food.foods[0] = food._create_food_item((5, 5))  # Food in snake's path
         obstacles.positions = {(7, 5)}  # Obstacle away from snake
         
         game_over = update_game_state(snake, obstacles, food)
         self.assertFalse(game_over)
         self.assertGreater(snake.length, initial_length)
         self.assertGreater(snake.score, initial_score)
+
+    def test_multiple_food_items(self):
+        """Test that multiple food items work correctly"""
+        # Initialize with 3 food items
+        food = Food(self.obstacles, max_foods=3)
+        
+        # Check that we have correct number of food items
+        self.assertEqual(len(food.foods), 3)
+        
+        # Check that all food positions are unique
+        positions = [food_item.position for food_item in food.foods]
+        self.assertEqual(len(positions), len(set(positions)))
+        
+        # Check that removing food works correctly
+        first_food_pos = food.foods[0].position
+        properties = food.remove_food(first_food_pos)
+        
+        # Verify properties were returned
+        self.assertIsNotNone(properties)
+        self.assertIn('points', properties)
+        self.assertIn('speed_change', properties)
+        self.assertIn('duration', properties)
+        
+        # Check that a new food item was created
+        self.assertEqual(len(food.foods), 3)
+        
+        # Check that the new food position is different
+        self.assertNotIn(first_food_pos, [food_item.position for food_item in food.foods])
+
+    def test_snake_food_interaction(self):
+        """Test that snake correctly interacts with multiple food items"""
+        food = Food(self.obstacles, max_foods=1)  # Use single food for simpler testing
+        snake = Snake()
+        
+        # Position snake one space away from food
+        food_pos = food.foods[0].position
+        snake.positions = [
+            ((food_pos[0] - 1) % GRID_WIDTH, food_pos[1])  # One space to the left of food
+        ]
+        snake.direction = RIGHT  # Moving right towards food
+        
+        # Store initial score
+        initial_score = snake.score
+        
+        # First update - snake should eat the food
+        game_over = update_game_state(snake, self.obstacles, food)
+        
+        # Verify food was eaten and score increased
+        self.assertFalse(game_over)
+        self.assertGreater(snake.score, initial_score)
+        self.assertEqual(len(food.foods), 1)  # Should still have one food
+        self.assertNotEqual(food.foods[0].position, food_pos)  # New food should be in different position
+        
+        # Get new food position
+        new_food_pos = food.foods[0].position
+        self.assertNotEqual(new_food_pos, food_pos)  # Verify positions are different
 
     def tearDown(self):
         pygame.quit()
