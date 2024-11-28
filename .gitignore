@@ -41,6 +41,7 @@ htmlcov/
 
 # Game files
 high_score.txt
+screenshots/
 
 # Virtual Environment
 venv/

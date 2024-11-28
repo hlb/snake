@@ -1,8 +1,10 @@
 # Snake Game
 
-## Abot
+## About
 
 This is a Snake game implementation that demonstrates how [Windsurf](https://codeium.com/windsurf) can be used to develop and maintain software. The entire codebase, including game logic, tests, and documentation, has been written with the assistance of Windsurf.
+
+![Snake Game Screenshot](docs/screenshot.png)
 
 ## Quick Start
 
@@ -20,6 +22,9 @@ pip install -r requirements.txt
 
 # Launch the game
 python snake_game.py
+
+# Launch with automatic screenshots (captures when eating food)
+python snake_game.py --screenshots
 ```
 
 ## Gameplay

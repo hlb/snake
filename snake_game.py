@@ -1,4 +1,6 @@
 import os
+from datetime import datetime
+import argparse
 import pygame
 from src import (
     Snake,
@@ -57,10 +59,38 @@ if background_music:
         print(f"Failed to play background music: {str(e)}")
 
 
+class Screenshot:
+    delay_ms = 500
+
+    def __init__(self):
+        self.pending = False
+        self.scheduled_time = 0
+        self.directory = "screenshots"
+        os.makedirs(self.directory, exist_ok=True)
+
+    def schedule(self):
+        """Schedule a screenshot to be taken after delay_ms"""
+        self.pending = True
+        self.scheduled_time = pygame.time.get_ticks() + self.delay_ms
+
+    def update(self, screen):
+        """Check and take screenshot if scheduled time has passed"""
+        if not self.pending:
+            return
+
+        current_time = pygame.time.get_ticks()
+        if current_time >= self.scheduled_time:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            path = f"{self.directory}/snake_{timestamp}.png"
+            pygame.image.save(screen, path)
+            self.pending = False
+
+
 class GameState:
     def __init__(self):
         self.high_score = self.load_high_score()
         self.start_time = 0
+        self.screenshot = Screenshot()  # Initialize screenshot manager
 
     def load_high_score(self):
         try:
@@ -146,7 +176,7 @@ def handle_direction_change(key, snake):
         snake.direction = directions[key][0]
 
 
-def update_game_state(snake, obstacles, food):
+def update_game_state(snake, obstacles, food, enable_screenshots=False, screenshot_manager=None):
     """Update game state and handle collisions."""
     # Check for collision with obstacles or self
     if snake.update(obstacles):
@@ -165,6 +195,10 @@ def update_game_state(snake, obstacles, food):
         snake.score += food_properties["points"]  # Update score when eating food
         snake.handle_food_effect(food_properties)
 
+        # Schedule screenshot if enabled
+        if enable_screenshots and screenshot_manager:
+            screenshot_manager.schedule()
+
         # Add new obstacle every 10 points
         if snake.score % 10 == 0:
             obstacles.add_obstacle(snake)
@@ -173,7 +207,7 @@ def update_game_state(snake, obstacles, food):
     return False
 
 
-def render_game(screen, snake, food, obstacles, game_over, game_state):
+def render_game(screen, snake, food, obstacles, game_over, game_state, screenshot_manager=None):
     """Render the game state"""
     screen.fill(BACKGROUND)
     draw_grid(screen)
@@ -202,6 +236,10 @@ def render_game(screen, snake, food, obstacles, game_over, game_state):
     time_rect.midtop = (WINDOW_WIDTH // 2, 10)
     screen.blit(time_text, time_rect)
 
+    # Update and take screenshot if scheduled
+    if screenshot_manager:
+        screenshot_manager.update(screen)
+
     if game_over:
         show_game_over(screen, snake.score, game_state)
     else:
@@ -209,7 +247,13 @@ def render_game(screen, snake, food, obstacles, game_over, game_state):
 
 
 def main():
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description="Snake Game")
+    parser.add_argument("--screenshots", action="store_true", help="Enable screenshots when snake eats food")
+    args = parser.parse_args()
+
     game_state = GameState()
+    screenshot_manager = Screenshot() if args.screenshots else None
     snake = Snake()
     obstacles = Obstacle()
     food = Food(obstacles)
@@ -246,9 +290,9 @@ def main():
             continue
 
         if not game_over:
-            game_over = update_game_state(snake, obstacles, food)
+            game_over = update_game_state(snake, obstacles, food, args.screenshots, screenshot_manager)
 
-        render_game(game_screen, snake, food, obstacles, game_over, game_state)
+        render_game(game_screen, snake, food, obstacles, game_over, game_state, screenshot_manager)
         clock.tick(snake.speed)
 
 
