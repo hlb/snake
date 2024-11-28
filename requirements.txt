@@ -1,2 +1,4 @@
 pygame==2.5.2
 pygame_emojis==0.1.1
+pytest==8.3.3
+pytest-cov==4.1.0
