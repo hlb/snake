@@ -60,25 +60,34 @@ snake/
 ### 3. Food System (src/food.py)
 - **Responsibility**: Food item management
 - **Types**:
-  - Normal Food (70% chance)
+  - Normal Food (40% chance)
     - +1 point
     - Regular speed
-  - Golden Apple (15% chance)
+    - Emojis: 🍕🍇🍪🍓
+  - Golden Food (20% chance)
     - +2 points
     - Regular speed
-  - Speed Fruit (15% chance)
+    - Emojis: 🌟⭐🌞
+  - Speed Food (20% chance)
     - +1 point
     - Temporary speed boost
+    - Emojis: ⚡🚀💨
+  - Slow Food (20% chance)
+    - +1 point
+    - Temporary speed reduction
+    - Emojis: 🐌🦥🐢
 - **Features**:
   - Random position generation
   - Collision avoidance with obstacles
-  - Type-specific effects
+  - Type-specific effects and durations
   - Visual representation with emojis
+  - Effect stacking with base speed
 
 ### 4. Obstacle System (src/obstacle.py)
 - **Responsibility**: Obstacle management
 - **Features**:
-  - Static obstacle placement
+  - Dynamic obstacle generation
+  - New obstacle every 10 points
   - Collision detection
   - Position validation
   - Grid-based positioning
@@ -89,10 +98,11 @@ snake/
   - Window dimensions
   - Grid settings
   - Colors and visuals
-  - Game speeds
-  - Food properties
+  - Game speeds and limits (2-12)
+  - Food properties and effects
   - Direction vectors
   - Sound settings
+  - Score thresholds
 
 ## Testing Architecture
 
@@ -125,14 +135,18 @@ snake/
 ### Integration Tests
 - **Game Mechanics** (test_game_mechanics.py):
   - State transitions
-  - Score management
+  - Score calculation
+  - Speed effects
+  - Food interactions
   - Reset functionality
   - Direction changes
+  - Obstacle generation
   
 - **UI Tests** (test_ui.py):
   - Menu rendering
   - Game screen rendering
-  - Score display
+  - Score and high score display
+  - Timer display
   - Game over screen
 
 ## Game States and Transitions
