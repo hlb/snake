@@ -11,7 +11,10 @@ snake/
 │   ├── constants.py       # Game constants and configurations
 │   ├── snake.py          # Snake class implementation
 │   ├── food.py           # Food class implementation
-│   └── obstacle.py       # Obstacle class implementation
+│   ├── obstacle.py       # Obstacle class implementation
+│   ├── game_state.py     # Game state management
+│   ├── sound.py          # Sound system implementation
+│   └── ui.py             # UI system implementation
 ├── tests/                 # Test suite directory
 │   ├── test_base.py      # Base test class with common utilities
 │   ├── unit/             # Unit tests directory
@@ -35,15 +38,40 @@ snake/
 ## Core Components
 
 ### 1. Game Engine (snake_game.py)
-- **Responsibility**: Main game loop and state management
+- **Responsibility**: Main game loop and event handling
 - **Key Features**:
-  - Game state handling (menu, playing, game over)
   - Event processing
-  - Rendering coordination
-  - Sound system management
-  - Score tracking
+  - Component coordination
+  - Game initialization
 
-### 2. Snake (src/snake.py)
+### 2. Game State (src/game_state.py)
+- **Responsibility**: Game state management
+- **Key Features**:
+  - Game state transitions (menu, playing, paused, game over)
+  - Score tracking and high score persistence
+  - Game reset functionality
+  - State validation
+
+### 3. Sound System (src/sound.py)
+- **Responsibility**: Audio management
+- **Key Features**:
+  - Sound effect loading and playback
+  - Background music control
+  - Volume management
+  - Error handling for missing files
+
+### 4. UI System (src/ui.py)
+- **Responsibility**: Visual rendering
+- **Components**:
+  - GameRenderer: Game screen rendering
+  - Screenshot: Screenshot capture system
+- **Features**:
+  - Menu screens (start, game over)
+  - Game state visualization
+  - Score display
+  - Screenshot scheduling and capture
+
+### 5. Snake (src/snake.py)
 - **Responsibility**: Snake behavior and properties
 - **Key Features**:
   - Movement mechanics
@@ -57,7 +85,7 @@ snake/
   - Score
   - Effect timers
 
-### 3. Food System (src/food.py)
+### 6. Food System (src/food.py)
 - **Responsibility**: Food item management
 - **Types**:
   - Normal Food (40% chance)
@@ -83,7 +111,7 @@ snake/
   - Visual representation with emojis
   - Effect stacking with base speed
 
-### 4. Obstacle System (src/obstacle.py)
+### 7. Obstacle System (src/obstacle.py)
 - **Responsibility**: Obstacle management
 - **Features**:
   - Dynamic obstacle generation
@@ -92,7 +120,7 @@ snake/
   - Position validation
   - Grid-based positioning
 
-### 5. Constants (src/constants.py)
+### 8. Constants (src/constants.py)
 - **Responsibility**: Game configuration and constants
 - **Categories**:
   - Window dimensions
