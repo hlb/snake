@@ -11,20 +11,23 @@ class TestFood(SnakeGameTest):
         for food_item in self.food.foods:
             self.assert_position_in_grid(food_item.position)
             self.assertNotIn(food_item.position, self.obstacles.positions)
-            self.assertIn(food_item.type, ['normal', 'golden', 'speed'])
+            self.assertIn(food_item.type, ['normal', 'golden', 'speed', 'slow'])
             self.assertIn('points', food_item.properties)
 
     def test_food_effects(self):
         """Test different food effects on snake."""
-        # Test golden apple effect
-        initial_score = self.snake.score
-        self.snake.handle_food_effect({'points': 2, 'speed_change': 0, 'duration': 0})
-        self.assertEqual(self.snake.score, initial_score + 2)
-
         # Test speed fruit effect
         initial_speed = self.snake.speed
         self.snake.handle_food_effect({'points': 1, 'speed_change': 2, 'duration': 1})
         self.assertEqual(self.snake.speed, initial_speed + 2)
+        pygame.time.wait(10)
+        self.snake.update(self.obstacles)
+        self.assertEqual(self.snake.speed, initial_speed)
+
+        # Test slow fruit effect
+        initial_speed = self.snake.speed
+        self.snake.handle_food_effect({'points': 1, 'speed_change': -2, 'duration': 1})
+        self.assertEqual(self.snake.speed, initial_speed - 2)
         pygame.time.wait(10)
         self.snake.update(self.obstacles)
         self.assertEqual(self.snake.speed, initial_speed)

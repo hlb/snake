@@ -52,13 +52,11 @@ class Snake:
 
     def handle_food_effect(self, food_properties):
         """Handle the effects of different food types."""
-        # Add points
-        self.score += food_properties['points']
-        
-        # Handle speed change
+        # Handle speed change only
         if food_properties['speed_change'] != 0:
             self.base_speed = self.speed  # Store current base speed
-            self.speed += food_properties['speed_change']
+            self.speed += food_properties['speed_change']  # Apply speed change directly
+            self.speed = max(2, min(self.speed, 12))  # Keep speed between 2 and 12
             if food_properties['duration'] > 0:
                 self.effect_end_time = pygame.time.get_ticks() + food_properties['duration']
 

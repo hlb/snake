@@ -193,6 +193,7 @@ def update_game_state(snake, obstacles, food):
         if eat_sound:
             eat_sound.play()
         snake.length += food_properties['points']
+        snake.score += food_properties['points']  # Update score when eating food
         snake.handle_food_effect(food_properties)
         
         # Add new obstacle every 10 points
@@ -224,7 +225,8 @@ def render_game(screen, snake, food, obstacles, game_over):
     screen.blit(high_score_text, high_score_rect)
     
     # Draw timer
-    elapsed_time = (pygame.time.get_ticks() - start_time) // 1000  # Convert to seconds
+    current_time = pygame.time.get_ticks()
+    elapsed_time = current_time // 1000  # Convert to seconds
     time_text = font.render(f'Time: {elapsed_time}s', True, SCORE_COLOR)
     time_rect = time_text.get_rect()
     time_rect.midtop = (WINDOW_WIDTH // 2, 10)
