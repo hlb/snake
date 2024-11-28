@@ -30,10 +30,14 @@ OBSTACLE_COUNT = 3
 
 # Food types and their effects
 FOOD_TYPES = {
-    'normal': {'points': 1, 'speed_change': 0, 'duration': 0},
-    'golden': {'points': 2, 'speed_change': 0, 'duration': 0},
-    'speed': {'points': 1, 'speed_change': 2, 'duration': 5000},  # 5 seconds duration
-    'slow': {'points': 1, 'speed_change': -2, 'duration': 5000}  # 5 seconds slow effect
+    "normal": {"points": 1, "speed_change": 0, "duration": 0},
+    "golden": {"points": 2, "speed_change": 0, "duration": 0},
+    "speed": {"points": 1, "speed_change": 2, "duration": 5000},  # 5 seconds duration
+    "slow": {
+        "points": 1,
+        "speed_change": -2,
+        "duration": 5000,
+    },  # 5 seconds slow effect
 }
 
 # Direction constants
@@ -42,14 +46,15 @@ DOWN = (0, 1)
 LEFT = (-1, 0)
 RIGHT = (1, 0)
 
+
 def get_font(size):
     # macOS system font paths
     system_fonts = [
-        '/System/Library/Fonts/PingFang.ttc',  # PingFang
-        '/System/Library/Fonts/STHeiti Light.ttc',  # Heiti
-        '/System/Library/Fonts/Hiragino Sans GB.ttc'  # Hiragino
+        "/System/Library/Fonts/PingFang.ttc",  # PingFang
+        "/System/Library/Fonts/STHeiti Light.ttc",  # Heiti
+        "/System/Library/Fonts/Hiragino Sans GB.ttc",  # Hiragino
     ]
-    
+
     # Try to load system fonts
     for font_path in system_fonts:
         if os.path.exists(font_path):
@@ -57,13 +62,15 @@ def get_font(size):
                 return pygame.font.Font(font_path, size)
             except:
                 continue
-    
+
     # If no Chinese fonts found, use default font
     return pygame.font.Font(None, size)
+
 
 def draw_rounded_rect(surface, color, rect, radius):
     """Draw a rounded rectangle"""
     pygame.draw.rect(surface, color, rect, border_radius=radius)
+
 
 def draw_grid(screen):
     """Draw background grid"""

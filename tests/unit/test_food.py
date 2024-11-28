@@ -2,6 +2,7 @@ import pygame
 from tests.test_base import SnakeGameTest
 from src import Food
 
+
 class TestFood(SnakeGameTest):
     """Unit tests for Food class functionality."""
 
@@ -11,14 +12,14 @@ class TestFood(SnakeGameTest):
         for food_item in self.food.foods:
             self.assert_position_in_grid(food_item.position)
             self.assertNotIn(food_item.position, self.obstacles.positions)
-            self.assertIn(food_item.type, ['normal', 'golden', 'speed', 'slow'])
-            self.assertIn('points', food_item.properties)
+            self.assertIn(food_item.type, ["normal", "golden", "speed", "slow"])
+            self.assertIn("points", food_item.properties)
 
     def test_food_effects(self):
         """Test different food effects on snake."""
         # Test speed fruit effect
         initial_speed = self.snake.speed
-        self.snake.handle_food_effect({'points': 1, 'speed_change': 2, 'duration': 1})
+        self.snake.handle_food_effect({"points": 1, "speed_change": 2, "duration": 1})
         self.assertEqual(self.snake.speed, initial_speed + 2)
         pygame.time.wait(10)
         self.snake.update(self.obstacles)
@@ -26,7 +27,7 @@ class TestFood(SnakeGameTest):
 
         # Test slow fruit effect
         initial_speed = self.snake.speed
-        self.snake.handle_food_effect({'points': 1, 'speed_change': -2, 'duration': 1})
+        self.snake.handle_food_effect({"points": 1, "speed_change": -2, "duration": 1})
         self.assertEqual(self.snake.speed, initial_speed - 2)
         pygame.time.wait(10)
         self.snake.update(self.obstacles)
@@ -36,12 +37,12 @@ class TestFood(SnakeGameTest):
         """Test that food positions are properly randomized."""
         # Get initial food positions
         initial_positions = {food.position for food in self.food.foods}
-        
+
         # Force food regeneration
         new_food = Food(self.obstacles)
-        
+
         # Get new positions
         new_positions = {food.position for food in new_food.foods}
-        
+
         # Verify that at least some positions are different
         self.assertTrue(initial_positions != new_positions)

@@ -1,7 +1,6 @@
 from tests.test_base import SnakeGameTest
-from src import (
-    GRID_WIDTH, GRID_HEIGHT, UP, DOWN, LEFT, RIGHT
-)
+from src import GRID_WIDTH, GRID_HEIGHT, UP, DOWN, LEFT, RIGHT
+
 
 class TestSnake(SnakeGameTest):
     """Unit tests for Snake class functionality."""
@@ -28,7 +27,9 @@ class TestSnake(SnakeGameTest):
         """Test snake collision with itself."""
         self.snake.positions = [(6, 5), (5, 5), (4, 5)]
         self.snake.direction = LEFT
-        new_pos = ((6, 5)[0] + LEFT[0]) % GRID_WIDTH, ((6, 5)[1] + LEFT[1]) % GRID_HEIGHT
+        new_pos = ((6, 5)[0] + LEFT[0]) % GRID_WIDTH, (
+            (6, 5)[1] + LEFT[1]
+        ) % GRID_HEIGHT
         self.assertTrue(self.snake._check_collision(new_pos, self.obstacles))
 
     def test_snake_collision_with_obstacle(self):
@@ -36,7 +37,9 @@ class TestSnake(SnakeGameTest):
         self.snake = self.create_test_snake_at((5, 5))
         self.obstacles.positions = {(6, 5)}
         self.snake.direction = RIGHT
-        new_pos = ((5, 5)[0] + RIGHT[0]) % GRID_WIDTH, ((5, 5)[1] + RIGHT[1]) % GRID_HEIGHT
+        new_pos = ((5, 5)[0] + RIGHT[0]) % GRID_WIDTH, (
+            (5, 5)[1] + RIGHT[1]
+        ) % GRID_HEIGHT
         self.assertTrue(self.snake._check_collision(new_pos, self.obstacles))
 
     def test_snake_growth(self):

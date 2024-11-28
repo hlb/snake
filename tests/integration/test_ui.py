@@ -2,6 +2,7 @@ import pygame
 from tests.test_base import SnakeGameTest
 from snake_game import show_start_menu, render_game
 
+
 class TestUI(SnakeGameTest):
     """Integration tests for UI components."""
 

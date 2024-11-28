@@ -1,0 +1,41 @@
+[MASTER]
+# Python code to analyze
+ignore=CVS
+persistent=yes
+
+# Add any Python module names here where you want to disable all warnings
+disable=C0111,C0103,W0511,R0903,R0913,R0914,W0703
+
+# Maximum line length
+max-line-length=100
+
+[MESSAGES CONTROL]
+# Enable/disable specific pylint messages
+disable=missing-docstring,invalid-name,fixme,too-few-public-methods,too-many-arguments,too-many-locals,broad-except
+
+[FORMAT]
+# Maximum number of characters on a single line
+max-line-length=100
+
+# Maximum number of lines in a module
+max-module-lines=1000
+
+[BASIC]
+# Regular expression which should only match function or class names
+function-rgx=[a-z_][a-z0-9_]{2,50}$
+class-rgx=[A-Z_][a-zA-Z0-9_]+$
+
+# Regular expression which should only match correct variable names
+variable-rgx=[a-z_][a-z0-9_]{2,30}$
+
+[SIMILARITIES]
+# Minimum lines number of a similarity
+min-similarity-lines=4
+
+[TYPECHECK]
+# List of module names for which member attributes should not be checked
+ignored-modules=numpy,tensorflow,cv2,pygame
+
+[MISCELLANEOUS]
+# List of note tags to take into consideration
+notes=FIXME,XXX,TODO
