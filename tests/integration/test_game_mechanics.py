@@ -1,6 +1,6 @@
 import pygame
 from tests.test_base import SnakeGameTest
-from src import UP, DOWN, LEFT, RIGHT, Snake
+from src import UP, DOWN, LEFT, RIGHT, Snake, FOOD_TYPES
 from snake_game import handle_direction_change, update_game_state
 
 class TestGameMechanics(SnakeGameTest):
@@ -34,13 +34,31 @@ class TestGameMechanics(SnakeGameTest):
 
     def test_game_state_update(self):
         """Test game state updates."""
-        # Place food in snake's path
-        self.snake = self.create_test_snake_at((5, 5), RIGHT)
-        self.food.foods[0].position = (6, 5)
+        # Create a snake at a specific position
+        self.snake = Snake()
+        self.snake.positions = [(5, 5), (4, 5), (3, 5)]  # Snake facing right
+        self.snake.direction = RIGHT
+        self.snake.length = 3
+        self.snake.score = 0
         
-        # Update game state
+        # Create a food item right in front of the snake
+        food_pos = (6, 5)
+        food_type = 'normal'
+        food_item = self.food._create_food_item(food_pos)
+        food_item.type = food_type
+        food_item.properties = FOOD_TYPES[food_type]  # Use predefined food properties
+        self.food.foods = [food_item]
+        
+        # Get initial score
         initial_score = self.snake.score
-        update_game_state(self.snake, self.obstacles, self.food)
+        print(f"\nInitial snake head: {self.snake.positions[0]}")
+        print(f"Food position: {food_pos}")
+        print(f"Initial score: {initial_score}")
+        
+        # Update game state (this will also update snake position)
+        update_game_state(self.snake, self.obstacles, self.food)  # Handle food collision
+        print(f"After game state update snake head: {self.snake.positions[0]}")
+        print(f"Final score: {self.snake.score}")
         
         # Verify food collection
         self.assertTrue(self.snake.score > initial_score)
@@ -54,7 +72,7 @@ class TestGameMechanics(SnakeGameTest):
         # Create speed boost food in snake's path
         self.food.foods = [self.food._create_food_item((6, 5))]
         self.food.foods[0].type = 'speed'
-        self.food.foods[0].properties = {'points': 1, 'speed_change': 2, 'duration': 1000}
+        self.food.foods[0].properties = FOOD_TYPES['speed']
         
         # Update game state and verify speed increase
         update_game_state(self.snake, self.obstacles, self.food)
@@ -67,7 +85,7 @@ class TestGameMechanics(SnakeGameTest):
         # Create slow down food in snake's path
         self.food.foods = [self.food._create_food_item((6, 5))]
         self.food.foods[0].type = 'slow'
-        self.food.foods[0].properties = {'points': 1, 'speed_change': -2, 'duration': 1000}
+        self.food.foods[0].properties = FOOD_TYPES['slow']
         
         # Update game state and verify speed decrease
         update_game_state(self.snake, self.obstacles, self.food)

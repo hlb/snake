@@ -37,6 +37,15 @@ class SnakeGameTest(unittest.TestCase):
 
     def create_test_snake_at(self, position, direction=None):
         """Create a snake at a specific position with optional direction."""
-        self.snake.positions = [position]
-        self.snake.direction = direction or RIGHT
+        direction = direction or RIGHT
+        dx, dy = direction
+        # Create snake body behind the head based on direction
+        positions = [position]
+        for i in range(1, self.snake.length):
+            positions.append((
+                (position[0] - dx * i) % GRID_WIDTH,
+                (position[1] - dy * i) % GRID_HEIGHT
+            ))
+        self.snake.positions = positions
+        self.snake.direction = direction
         return self.snake

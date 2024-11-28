@@ -35,6 +35,12 @@ var/
 ehthumbs.db
 Thumbs.db
 
+# Coverage
+.coverage
+
+# Game files
+high_score.txt
+
 # Virtual Environment
 venv/
 .venv/
