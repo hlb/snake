@@ -58,6 +58,11 @@ The game features three types of collectible food items:
 - Score increases with each food item collected
 - Background music and sound effects enhance the experience
 
+## Acknowledgments
+
+### Music
+- Background Music: ["The Snake Game (original GB music)"](https://youtu.be/FpDWpX9luCQ?si=zP7c-KROsUjh8SQ5) by Zuka
+
 ## Development
 
 ### Prerequisites

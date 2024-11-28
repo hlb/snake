@@ -31,7 +31,7 @@ def load_sound(file_path):
 # Set sound effects
 eat_sound = load_sound('sounds/eat.wav')
 crash_sound = load_sound('sounds/crash.wav')
-background_music = load_sound('sounds/background.wav')
+background_music = load_sound('sounds/background.mp3')
 
 # Set volume
 if eat_sound:
