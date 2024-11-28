@@ -3,7 +3,7 @@ import pygame
 from pygame_emojis import load_emoji
 from .constants import (
     GRID_SIZE, GRID_WIDTH, GRID_HEIGHT,
-    NORMAL_FOOD_COLOR, GOLDEN_APPLE_COLOR, SPEED_FRUIT_COLOR,
+    NORMAL_FOOD_COLOR, GOLDEN_APPLE_COLOR, SPEED_FRUIT_COLOR, SLOW_FRUIT_COLOR,
     FOOD_TYPES
 )
 from .particle_system import ParticleSystem
@@ -45,7 +45,8 @@ class Food:
         self.food_emojis = {
             'normal': ['🍕', '🍇', '🍪', '🍓'],
             'golden': ['🌟', '⭐', '🌞'],
-            'speed': ['⚡', '🚀', '💨']
+            'speed': ['⚡', '🚀', '💨'],
+            'slow': ['🐌', '🦥', '🐢']
         }
         
         # Initialize food items
@@ -61,15 +62,18 @@ class Food:
         
         # Set random type based on probabilities
         rand = random.random()
-        if rand < 0.70:
+        if rand < 0.60:
             type_name = 'normal'
             color = NORMAL_FOOD_COLOR
-        elif rand < 0.85:
+        elif rand < 0.75:
             type_name = 'golden'
             color = GOLDEN_APPLE_COLOR
-        else:
+        elif rand < 0.875:
             type_name = 'speed'
             color = SPEED_FRUIT_COLOR
+        else:
+            type_name = 'slow'
+            color = SLOW_FRUIT_COLOR
         
         # Get effect properties and set emoji
         properties = FOOD_TYPES[type_name]

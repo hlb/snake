@@ -16,6 +16,7 @@ OBSTACLE_COLOR = (97, 175, 239)
 NORMAL_FOOD_COLOR = FOOD_COLOR
 GOLDEN_APPLE_COLOR = (255, 215, 0)  # Gold color
 SPEED_FRUIT_COLOR = (138, 43, 226)  # Purple color
+SLOW_FRUIT_COLOR = (65, 105, 225)  # Royal blue color
 
 # Game settings
 WINDOW_WIDTH = 800
@@ -31,7 +32,8 @@ OBSTACLE_COUNT = 3
 FOOD_TYPES = {
     'normal': {'points': 1, 'speed_change': 0, 'duration': 0},
     'golden': {'points': 2, 'speed_change': 0, 'duration': 0},
-    'speed': {'points': 1, 'speed_change': 2, 'duration': 5000}  # 5 seconds duration
+    'speed': {'points': 1, 'speed_change': 2, 'duration': 5000},  # 5 seconds duration
+    'slow': {'points': 1, 'speed_change': -2, 'duration': 5000}  # 5 seconds slow effect
 }
 
 # Direction constants
