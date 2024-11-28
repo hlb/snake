@@ -1,5 +1,4 @@
 import unittest
-import os
 import pygame
 from src.sound import SoundManager
 

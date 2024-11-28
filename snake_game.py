@@ -1,4 +1,3 @@
-import os
 import argparse
 import pygame
 from src import (
@@ -76,50 +75,36 @@ def main():
     # Start background music
     sound_manager.play_background_music()
 
+    # Game objects
+    snake = None
+    obstacles = None
+    food = None
+
     while True:
-        if not game_state.is_playing and not game_state.is_game_over:
-            renderer.show_start_menu(game_screen)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+        # Handle events
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_q:
                     pygame.quit()
                     return
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_q:
-                        pygame.quit()
-                        return
-                    if event.key == pygame.K_RETURN:
-                        snake = Snake()
-                        obstacles = Obstacle()
-                        food = Food(obstacles)
-                        game_state.start_game()
-
-        elif game_state.is_game_over:
-            renderer.show_game_over(game_screen, game_state.score, game_state.high_score)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    return
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_q:
-                        pygame.quit()
-                        return
-                    if event.key == pygame.K_RETURN:
-                        snake = Snake()
-                        obstacles = Obstacle()
-                        food = Food(obstacles)
-                        game_state.start_game()
-
-        else:  # Game is running
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    return
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_q:
-                        pygame.quit()
-                        return
+                if event.key == pygame.K_RETURN and (not game_state.is_playing or game_state.is_game_over):
+                    # Start new game
+                    snake = Snake()
+                    obstacles = Obstacle()
+                    food = Food(obstacles)
+                    game_state.start_game()
+                elif game_state.is_playing:
                     handle_direction_change(event.key, snake)
 
+        # Update game state based on current state
+        if not game_state.is_playing and not game_state.is_game_over:
+            renderer.show_start_menu(game_screen)
+        elif game_state.is_game_over:
+            renderer.show_game_over(game_screen, game_state.score, game_state.high_score)
+        else:  # Game is running
             # Update game state
             game_over = update_game_state(snake, obstacles, food, sound_manager, enable_screenshots=args.screenshots, screenshot_manager=screenshot_manager)
 
@@ -127,7 +112,7 @@ def main():
                 game_state.end_game()
             else:
                 game_state.update_score(snake.score)
-                renderer.render_game(game_screen, snake, food, obstacles, game_state.is_game_over, game_state.score, game_state.high_score, screenshot_manager)
+                renderer.render_game(game_screen, snake, food, obstacles, score=game_state.score, high_score=game_state.high_score, screenshot_manager=screenshot_manager)
 
             clock.tick(snake.speed)
 

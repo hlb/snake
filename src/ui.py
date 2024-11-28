@@ -1,6 +1,7 @@
-import pygame
-from datetime import datetime
 import os
+from datetime import datetime
+import pygame
+
 from . import WINDOW_WIDTH, WINDOW_HEIGHT, BACKGROUND, SCORE_COLOR, GAME_OVER_COLOR, get_font, draw_grid
 
 
@@ -82,25 +83,21 @@ class GameRenderer:
         pygame.display.flip()
 
     @staticmethod
-    def render_game(screen, snake, food, obstacles, game_over, score, high_score, screenshot_manager=None):
-        """Render the current game state"""
+    def render_game(screen, snake, food, obstacles, score, high_score, screenshot_manager=None):
+        """Render the game screen with all components."""
         screen.fill(BACKGROUND)
         draw_grid(screen)
 
-        # Draw game elements
+        # Render game objects
+        snake.render(screen)
         food.render(screen)
         obstacles.render(screen)
-        snake.render(screen)
 
-        # Draw score
-        font = get_font(36)
-        score_text = font.render(f"Score: {score}", True, SCORE_COLOR)
+        # Draw scores
+        score_text = get_font(24).render(f"Score: {score}", True, SCORE_COLOR)
+        high_score_text = get_font(24).render(f"High Score: {high_score}", True, SCORE_COLOR)
         screen.blit(score_text, (10, 10))
-
-        high_score_text = font.render(f"High Score: {high_score}", True, SCORE_COLOR)
-        high_score_rect = high_score_text.get_rect()
-        high_score_rect.topright = (WINDOW_WIDTH - 10, 10)
-        screen.blit(high_score_text, high_score_rect)
+        screen.blit(high_score_text, (WINDOW_WIDTH - high_score_text.get_width() - 10, 10))
 
         if screenshot_manager:
             screenshot_manager.update(screen)

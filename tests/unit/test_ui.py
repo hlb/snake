@@ -1,7 +1,7 @@
-import unittest
 import os
+import unittest
 import pygame
-from datetime import datetime
+
 from src.ui import Screenshot, GameRenderer
 from src import WINDOW_WIDTH, WINDOW_HEIGHT, BACKGROUND
 
@@ -105,7 +105,7 @@ class TestGameRenderer(unittest.TestCase):
         food = MockObject()
         obstacles = MockObject()
 
-        GameRenderer.render_game(self.screen, snake, food, obstacles, game_over=False, score=score, high_score=high_score)
+        GameRenderer.render_game(self.screen, snake, food, obstacles, score=score, high_score=high_score)
 
         # Get the screen's pixel array
         pixel_array = pygame.surfarray.array3d(self.screen)

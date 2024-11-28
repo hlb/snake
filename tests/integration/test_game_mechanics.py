@@ -154,6 +154,16 @@ def test_food_collision_effects(setup_game):
     """Test that food collision triggers correct effects"""
     snake, food, obstacles, _ = setup_game
 
+    # Mock sound manager
+    class MockSoundManager:
+        def play_eat_sound(self):
+            pass
+
+        def play_crash_sound(self):
+            pass
+
+    sound_manager = MockSoundManager()
+
     # Test each food type
     for food_type in ["normal", "golden", "speed", "slow"]:
         # Reset snake speed to initial value
@@ -176,7 +186,7 @@ def test_food_collision_effects(setup_game):
         snake.length = 1  # Set length to 1 to avoid self-collision
 
         # Simulate collision and update game state
-        update_game_state(snake, obstacles, food, None)
+        update_game_state(snake, obstacles, food, sound_manager)
         print(f"Speed after effect: {snake.speed}")
         print(f"Score: {snake.score}")
         print(f"Snake positions: {snake.positions}")
