@@ -4,21 +4,20 @@ ignore=CVS
 persistent=yes
 
 # Add any Python module names here where you want to disable all warnings
-disable=C0111,C0103,W0511,R0903,R0913,R0914,W0703
-
-# Maximum line length
-max-line-length=100
-
-[MESSAGES CONTROL]
-# Enable/disable specific pylint messages
-disable=missing-docstring,invalid-name,fixme,too-few-public-methods,too-many-arguments,too-many-locals,broad-except
+disable=C0111,  # missing-docstring
+        C0103,  # invalid-name
+        W0511,  # fixme
+        R0903,  # too-few-public-methods
+        R0913,  # too-many-arguments
+        R0914,  # too-many-locals
+        W0703   # broad-except
 
 [FORMAT]
 # Maximum number of characters on a single line
-max-line-length=100
+max-line-length=240
 
 # Maximum number of lines in a module
-max-module-lines=1000
+max-module-lines=500
 
 [BASIC]
 # Regular expression which should only match function or class names

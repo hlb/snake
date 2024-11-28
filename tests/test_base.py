@@ -1,6 +1,7 @@
 import unittest
 import pygame
 from src import Snake, Food, Obstacle, GRID_WIDTH, GRID_HEIGHT, UP, DOWN, LEFT, RIGHT
+from snake_game import GameState
 
 
 class SnakeGameTest(unittest.TestCase):
@@ -23,6 +24,7 @@ class SnakeGameTest(unittest.TestCase):
         self.obstacles = Obstacle()
         self.snake = Snake()
         self.food = Food(self.obstacles)
+        self.game_state = GameState()
 
     def assert_position_in_grid(self, position):
         """Assert that a position is within the game grid."""

@@ -1,9 +1,14 @@
 import pygame
+import pytest
+from pygame.locals import K_UP, K_DOWN
+
 from tests.test_base import SnakeGameTest
-from src import UP, DOWN, LEFT, RIGHT, Snake, FOOD_TYPES
+from src import Snake, Food, Obstacle, FOOD_TYPES, UP, RIGHT
+from src.constants import NORMAL_FOOD_COLOR, GOLDEN_APPLE_COLOR, SPEED_FRUIT_COLOR, SLOW_FRUIT_COLOR
 from snake_game import handle_direction_change, update_game_state
 
 
+# pylint: disable=protected-access,redefined-outer-name
 class TestGameMechanics(SnakeGameTest):
     """Integration tests for game mechanics."""
 
@@ -23,17 +28,13 @@ class TestGameMechanics(SnakeGameTest):
 
     def test_direction_change(self):
         """Test direction change handling."""
-        from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT
-
         # Test valid direction changes
         self.snake.direction = RIGHT
         handle_direction_change(K_UP, self.snake)
         self.assertEqual(self.snake.direction, UP)
 
         handle_direction_change(K_DOWN, self.snake)
-        self.assertEqual(
-            self.snake.direction, UP
-        )  # Should not change to opposite direction
+        self.assertEqual(self.snake.direction, UP)  # Should not change to opposite direction
 
     def test_game_state_update(self):
         """Test game state updates."""
@@ -59,9 +60,7 @@ class TestGameMechanics(SnakeGameTest):
         print(f"Initial score: {initial_score}")
 
         # Update game state (this will also update snake position)
-        update_game_state(
-            self.snake, self.obstacles, self.food
-        )  # Handle food collision
+        update_game_state(self.snake, self.obstacles, self.food)  # Handle food collision
         print(f"After game state update snake head: {self.snake.positions[0]}")
         print(f"Final score: {self.snake.score}")
 
@@ -95,17 +94,6 @@ class TestGameMechanics(SnakeGameTest):
         # Update game state and verify speed decrease
         update_game_state(self.snake, self.obstacles, self.food)
         self.assertEqual(self.snake.speed, initial_speed - 2)
-
-
-import pytest
-import pygame
-from src import Snake, Food, Obstacle, FOOD_TYPES, GRID_SIZE
-from src.constants import (
-    NORMAL_FOOD_COLOR,
-    GOLDEN_APPLE_COLOR,
-    SPEED_FRUIT_COLOR,
-    SLOW_FRUIT_COLOR,
-)
 
 
 @pytest.fixture

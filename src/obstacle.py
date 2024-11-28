@@ -25,12 +25,7 @@ class Obstacle:
                 random.randint(2, GRID_HEIGHT - 3),
             )
             # Ensure obstacles are not generated near the snake's initial position
-            if (
-                pos[0] < GRID_WIDTH // 2 - 2
-                or pos[0] > GRID_WIDTH // 2 + 2
-                or pos[1] < GRID_HEIGHT // 2 - 2
-                or pos[1] > GRID_HEIGHT // 2 + 2
-            ):
+            if pos[0] < GRID_WIDTH // 2 - 2 or pos[0] > GRID_WIDTH // 2 + 2 or pos[1] < GRID_HEIGHT // 2 - 2 or pos[1] > GRID_HEIGHT // 2 + 2:
                 self.positions.add(pos)
 
     def add_obstacle(self, snake):
@@ -42,17 +37,13 @@ class Obstacle:
         danger_positions = set()
         x, y = head
         dx, dy = direction
-        for i in range(3):  # Check the three cells in front
+        for _ in range(3):  # Check the three cells in front
             x = (x + dx) % GRID_WIDTH
             y = (y + dy) % GRID_HEIGHT
             danger_positions.add((x, y))
             # Add the cells to the left and right
-            danger_positions.add(
-                ((x + dy) % GRID_WIDTH, (y - dx) % GRID_HEIGHT)
-            )  # Left
-            danger_positions.add(
-                ((x - dy) % GRID_WIDTH, (y + dx) % GRID_HEIGHT)
-            )  # Right
+            danger_positions.add(((x + dy) % GRID_WIDTH, (y - dx) % GRID_HEIGHT))  # Left
+            danger_positions.add(((x - dy) % GRID_WIDTH, (y + dx) % GRID_HEIGHT))  # Right
 
         # Try to place a new obstacle
         attempts = 100  # Maximum attempts
@@ -63,11 +54,7 @@ class Obstacle:
             )
 
             # Check if the position meets all conditions
-            if (
-                pos not in snake.positions
-                and pos not in self.positions
-                and pos not in danger_positions
-            ):
+            if pos not in snake.positions and pos not in self.positions and pos not in danger_positions:
                 self.positions.add(pos)
                 break
             attempts -= 1

@@ -1,18 +1,33 @@
-import pygame
-import random
 import math
+import random
+from dataclasses import dataclass
+import pygame
+
+
+@dataclass
+class ParticleVisuals:
+    """Visual properties of a particle."""
+
+    color: tuple[int, int, int]
+    alpha: int = 255
+    size: int = 0
+
+    def __post_init__(self):
+        if self.size == 0:
+            self.size = random.randint(3, 6)
 
 
 class Particle:
     def __init__(self, x, y, color, velocity, lifetime=1.0):
+        # Essential attributes for physics/movement
         self.x = x
         self.y = y
-        self.color = color
         self.velocity = velocity
         self.lifetime = lifetime
         self.birth_time = pygame.time.get_ticks()
-        self.alpha = 255
-        self.size = random.randint(3, 6)  # Random particle size
+
+        # Visual properties grouped in dataclass
+        self.visuals = ParticleVisuals(color=color)
 
     def update(self):
         current_time = pygame.time.get_ticks()
@@ -29,17 +44,17 @@ class Particle:
         self.y += self.velocity[1]
 
         # Fade out
-        self.alpha = int(255 * (1 - age / self.lifetime))
+        self.visuals.alpha = int(255 * (1 - age / self.lifetime))
         return True
 
     def render(self, screen):
-        if self.alpha <= 0:
+        if self.visuals.alpha <= 0:
             return
 
-        surface = pygame.Surface((self.size * 2, self.size * 2), pygame.SRCALPHA)
-        color_with_alpha = (*self.color, self.alpha)
-        pygame.draw.circle(surface, color_with_alpha, (self.size, self.size), self.size)
-        screen.blit(surface, (int(self.x - self.size), int(self.y - self.size)))
+        surface = pygame.Surface((self.visuals.size * 2, self.visuals.size * 2), pygame.SRCALPHA)
+        color_with_alpha = (*self.visuals.color, self.visuals.alpha)
+        pygame.draw.circle(surface, color_with_alpha, (self.visuals.size, self.visuals.size), self.visuals.size)
+        screen.blit(surface, (int(self.x - self.visuals.size), int(self.y - self.visuals.size)))
 
 
 class ParticleSystem:

@@ -13,13 +13,13 @@ class TestUI(SnakeGameTest):
 
     def test_game_rendering(self):
         """Test game screen rendering."""
-        render_game(self.screen, self.snake, self.food, self.obstacles, False)
+        render_game(self.screen, self.snake, self.food, self.obstacles, False, self.game_state)
         pygame.display.flip()
 
     def test_score_display(self):
         """Test score display functionality."""
         initial_score = self.snake.score
         self.snake.score += 10
-        render_game(self.screen, self.snake, self.food, self.obstacles, False)
+        render_game(self.screen, self.snake, self.food, self.obstacles, False, self.game_state)
         pygame.display.flip()
         self.assertEqual(self.snake.score, initial_score + 10)

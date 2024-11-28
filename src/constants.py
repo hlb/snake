@@ -1,5 +1,9 @@
+import logging
 import os
 import pygame
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 
 # Color definitions
 BLACK = (0, 0, 0)
@@ -60,7 +64,8 @@ def get_font(size):
         if os.path.exists(font_path):
             try:
                 return pygame.font.Font(font_path, size)
-            except:
+            except (pygame.error, OSError) as e:
+                logging.error("Failed to load font %s: %s", font_path, str(e))
                 continue
 
     # If no Chinese fonts found, use default font

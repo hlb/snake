@@ -1,3 +1,4 @@
+import pygame
 from tests.test_base import SnakeGameTest
 from src import GRID_WIDTH, GRID_HEIGHT, GRID_SIZE
 
@@ -36,7 +37,6 @@ class TestObstacle(SnakeGameTest):
     def test_dynamic_obstacle_generation(self):
         """Test dynamic obstacle generation."""
         # Clear existing obstacles
-        initial_count = len(self.obstacles.positions)
         self.obstacles.positions.clear()
 
         # Add obstacle and verify it's placed correctly
@@ -69,8 +69,6 @@ class TestObstacle(SnakeGameTest):
     def test_obstacle_render(self):
         """Test obstacle rendering."""
         # Create a mock screen surface
-        import pygame
-
         screen = pygame.Surface((800, 600))
 
         # Clear obstacles and add one at known position
