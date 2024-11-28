@@ -4,6 +4,7 @@ from .constants import (
     GRID_WIDTH, GRID_HEIGHT, SNAKE_COLOR, GRID_SIZE,
     UP, DOWN, LEFT, RIGHT, draw_rounded_rect
 )
+from .particle_system import ParticleSystem
 
 class Snake:
     def __init__(self):
@@ -11,7 +12,12 @@ class Snake:
         self.score = 0
         self.speed = 6  # Initial speed
         self.base_speed = 6  # Keep track of base speed
-        self.color = SNAKE_COLOR
+        self.gradient_colors = [
+            (50, 205, 50),  # Light green
+            (34, 139, 34),  # Forest green
+            (0, 100, 0)     # Dark green
+        ]
+        self.particle_system = ParticleSystem()
         self.effect_end_time = 0  # Track when speed effect ends
         self._initialize_snake()
     
@@ -82,11 +88,20 @@ class Snake:
 
     def render(self, screen):
         """Render the snake on the screen."""
+        # Update and render particles
+        self.particle_system.update()
+        self.particle_system.render(screen)
+        
+        # Render snake with gradient
         for i, pos in enumerate(self.positions):
+            # Calculate gradient color based on position in snake
+            gradient_index = (i * len(self.gradient_colors)) // len(self.positions)
+            color = self.gradient_colors[min(gradient_index, len(self.gradient_colors) - 1)]
+            
             rect = pygame.Rect(
                 pos[0] * GRID_SIZE + 2,
                 pos[1] * GRID_SIZE + 2,
                 GRID_SIZE - 4,
                 GRID_SIZE - 4
             )
-            draw_rounded_rect(screen, self.color, rect, 10)
+            draw_rounded_rect(screen, color, rect, 10)

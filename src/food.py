@@ -6,6 +6,7 @@ from .constants import (
     NORMAL_FOOD_COLOR, GOLDEN_APPLE_COLOR, SPEED_FRUIT_COLOR,
     FOOD_TYPES
 )
+from .particle_system import ParticleSystem
 
 class FoodItem:
     """Represents a single food item in the game."""
@@ -49,6 +50,9 @@ class Food:
         
         # Initialize food items
         self._ensure_minimum_food()
+        
+        # Initialize particle system
+        self.particle_system = ParticleSystem()
     
     def _create_food_item(self, position=None):
         """Create a new food item with random type at given or random position."""
@@ -121,6 +125,35 @@ class Food:
         return [food.position for food in self.foods]
     
     def render(self, screen):
-        """Render all food items."""
+        """Render all food items and particles."""
+        # Update and render particles
+        self.particle_system.update()
+        self.particle_system.render(screen)
+        
+        # Render food items
         for food in self.foods:
             food.render(screen)
+    
+    def check_collision(self, pos):
+        """Check if snake collided with any food item."""
+        for i, food in enumerate(self.foods):
+            if food.position == pos:
+                # Create particle effect at food position
+                x = food.position[0] * GRID_SIZE + GRID_SIZE // 2
+                y = food.position[1] * GRID_SIZE + GRID_SIZE // 2
+                
+                # Create more particles with food's color
+                particle_count = 20
+                if food.type == 'golden':
+                    particle_count = 30  # More particles for golden food
+                elif food.type == 'speed':
+                    particle_count = 25  # Medium amount for speed food
+                
+                self.particle_system.emit(x, y, food.color, count=particle_count)
+                
+                # Remove eaten food and return its properties
+                properties = food.properties
+                self.foods.pop(i)
+                self._ensure_minimum_food()
+                return properties
+        return None

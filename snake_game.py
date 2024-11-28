@@ -15,6 +15,21 @@ pygame.mixer.quit()  # First close any running sound system
 pygame.mixer.init(44100, -16, 2, 2048)
 pygame.mixer.set_num_channels(8)  # Set more channels
 
+# Initialize high score system
+HIGH_SCORE_FILE = "high_score.txt"
+def load_high_score():
+    try:
+        with open(HIGH_SCORE_FILE, "r") as f:
+            return int(f.read())
+    except:
+        return 0
+
+def save_high_score(score):
+    with open(HIGH_SCORE_FILE, "w") as f:
+        f.write(str(score))
+
+high_score = load_high_score()
+
 # Load sound effects
 def load_sound(file_path):
     if not os.path.exists(file_path):
@@ -55,6 +70,11 @@ clock = pygame.time.Clock()
 
 def show_game_over(screen, score):
     """Show game over screen"""
+    global high_score
+    if score > high_score:
+        high_score = score
+        save_high_score(high_score)
+    
     font = get_font(64)
     text = font.render('Game Over!', True, GAME_OVER_COLOR)
     text_rect = text.get_rect()
@@ -67,7 +87,11 @@ def show_game_over(screen, score):
     score_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 50)
     screen.blit(score_text, score_rect)
     
-    # Add restart message
+    high_score_text = font.render(f'High Score: {high_score}', True, SCORE_COLOR)
+    high_score_rect = high_score_text.get_rect()
+    high_score_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
+    screen.blit(high_score_text, high_score_rect)
+    
     restart_text = font.render('Press ENTER to Restart', True, SCORE_COLOR)
     restart_rect = restart_text.get_rect()
     restart_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 100)
@@ -97,11 +121,14 @@ def show_start_menu(screen):
     pygame.display.flip()
 
 def main():
+    global start_time, high_score
+    
     snake = Snake()
     obstacles = Obstacle()
     food = Food(obstacles)
     game_over = False
     game_started = False
+    start_time = pygame.time.get_ticks()
     
     while True:
         for event in pygame.event.get():
@@ -109,33 +136,32 @@ def main():
                 pygame.quit()
                 return
             
-            if event.type != pygame.KEYDOWN:
-                continue
-            
-            if not game_started and event.key == pygame.K_RETURN:
-                game_started = True
-                continue
-            
-            if game_over:
-                if event.key == pygame.K_RETURN:
-                    snake, obstacles, food = reset_game()
-                    game_over = False
-                elif event.key == pygame.K_q:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_q:
                     pygame.quit()
                     return
-            elif game_started:
-                handle_direction_change(event.key, snake)
+                    
+                if not game_started:
+                    if event.key == pygame.K_RETURN:
+                        game_started = True
+                        start_time = pygame.time.get_ticks()  # Reset start time when game starts
+                elif game_over:
+                    if event.key == pygame.K_RETURN:
+                        snake = Snake()
+                        food = Food(obstacles)
+                        game_over = False
+                        start_time = pygame.time.get_ticks()  # Reset start time on restart
+                else:
+                    handle_direction_change(event.key, snake)
         
         if not game_started:
             show_start_menu(screen)
             continue
-            
+        
         if not game_over:
             game_over = update_game_state(snake, obstacles, food)
         
         render_game(screen, snake, food, obstacles, game_over)
-        
-        pygame.display.flip()
         clock.tick(snake.speed)
 
 def reset_game():
@@ -161,7 +187,7 @@ def update_game_state(snake, obstacles, food):
     
     # Check for collision with any food
     head_pos = snake.get_head_position()
-    food_properties = food.remove_food(head_pos)
+    food_properties = food.check_collision(head_pos)
     
     if food_properties:
         if eat_sound:
@@ -177,18 +203,37 @@ def update_game_state(snake, obstacles, food):
     return False
 
 def render_game(screen, snake, food, obstacles, game_over):
+    """Render the game state"""
     screen.fill(BACKGROUND)
     draw_grid(screen)
-    snake.render(screen)
+    
+    # Draw game elements
     food.render(screen)
     obstacles.render(screen)
+    snake.render(screen)
     
+    # Draw score
     font = get_font(24)
     score_text = font.render(f'Score: {snake.score}', True, SCORE_COLOR)
     screen.blit(score_text, (10, 10))
     
+    # Draw high score
+    high_score_text = font.render(f'High Score: {high_score}', True, SCORE_COLOR)
+    high_score_rect = high_score_text.get_rect()
+    high_score_rect.topright = (WINDOW_WIDTH - 10, 10)
+    screen.blit(high_score_text, high_score_rect)
+    
+    # Draw timer
+    elapsed_time = (pygame.time.get_ticks() - start_time) // 1000  # Convert to seconds
+    time_text = font.render(f'Time: {elapsed_time}s', True, SCORE_COLOR)
+    time_rect = time_text.get_rect()
+    time_rect.midtop = (WINDOW_WIDTH // 2, 10)
+    screen.blit(time_text, time_rect)
+    
     if game_over:
         show_game_over(screen, snake.score)
+    else:
+        pygame.display.flip()
 
 if __name__ == '__main__':
     main()
