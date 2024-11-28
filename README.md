@@ -90,15 +90,3 @@ python -m unittest discover tests -v
 # Run specific test suite
 python -m unittest tests/unit/test_snake.py -v
 ```
-
-Test suite organization:
-```
-tests/
-├── unit/             # Component tests
-│   ├── test_snake.py     # Snake behavior
-│   ├── test_food.py      # Food mechanics
-│   └── test_obstacle.py  # Obstacle system
-└── integration/      # System tests
-    ├── test_game_mechanics.py
-    └── test_ui.py
-```

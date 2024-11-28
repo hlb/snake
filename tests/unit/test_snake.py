@@ -1,4 +1,4 @@
-from tests.base_test import SnakeGameTest
+from tests.test_base import SnakeGameTest
 from src import (
     GRID_WIDTH, GRID_HEIGHT, UP, DOWN, LEFT, RIGHT
 )

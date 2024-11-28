@@ -1,5 +1,5 @@
 import pygame
-from tests.base_test import SnakeGameTest
+from tests.test_base import SnakeGameTest
 from snake_game import show_start_menu, render_game
 
 class TestUI(SnakeGameTest):

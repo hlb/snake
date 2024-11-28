@@ -1,5 +1,5 @@
 import pygame
-from tests.base_test import SnakeGameTest
+from tests.test_base import SnakeGameTest
 from src import UP, DOWN, LEFT, RIGHT, Snake
 from snake_game import handle_direction_change, update_game_state
 

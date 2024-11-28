@@ -13,7 +13,7 @@ snake/
 │   ├── food.py           # Food class implementation
 │   └── obstacle.py       # Obstacle class implementation
 ├── tests/                 # Test suite directory
-│   ├── base_test.py      # Base test class with common utilities
+│   ├── test_base.py      # Base test class with common utilities
 │   ├── unit/             # Unit tests directory
 │   │   ├── test_snake.py     # Snake component tests
 │   │   ├── test_food.py      # Food system tests
@@ -96,7 +96,7 @@ snake/
 
 ## Testing Architecture
 
-### Base Test Class (tests/base_test.py)
+### Base Test Class (tests/test_base.py)
 - **Responsibility**: Common test functionality
 - **Features**:
   - Pygame initialization/cleanup
