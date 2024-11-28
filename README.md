@@ -1,8 +1,8 @@
-# Modern Python Snake Game
+# Snake Game
 
-A modern take on the classic Snake game, built with Python and Pygame. Experience smooth animations, dynamic visuals, and engaging gameplay mechanics.
+## Abot
 
-![Snake Game Screenshot](docs/screenshot.png)
+This is a Snake game implementation that demonstrates how [Windsurf](https://codeium.com/windsurf) can be used to develop and maintain software. The entire codebase, including game logic, tests, and documentation, has been written with the assistance of Windsurf.
 
 ## Quick Start
 
@@ -105,7 +105,14 @@ python -m unittest discover tests -v
 
 # Run specific test categories
 python -m unittest tests/unit/test_snake.py -v     # Snake mechanics
-python -m unittest tests/unit/test_food.py -v      # Food effects
-python -m unittest tests/unit/test_obstacle.py -v  # Obstacle behavior
 python -m unittest tests/integration/*.py -v       # Integration tests
 ```
+
+### Code Coverage
+
+To run code coverage:
+
+```bash
+coverage run -m pytest
+coverage report
+coverage html  # generates HTML report in htmlcov/

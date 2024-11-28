@@ -37,6 +37,7 @@ Thumbs.db
 
 # Coverage
 .coverage
+htmlcov/
 
 # Game files
 high_score.txt
