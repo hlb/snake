@@ -44,6 +44,8 @@ high_score.txt
 screenshots/
 
 # Virtual Environment
+.env
+.env.leave
 venv/
 .venv/
 ENV/
