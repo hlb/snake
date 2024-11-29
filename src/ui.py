@@ -39,51 +39,46 @@ class GameRenderer:
         self.background.fill(BACKGROUND)
         draw_grid(self.background)
 
+    def render_text(self, screen, text, color, position, size=32, align="center"):
+        """Render text with specified alignment (center, left, or right)."""
+        font = get_font(size)
+        text_surface = font.render(text, True, color)
+        text_rect = text_surface.get_rect()
+
+        if align == "center":
+            text_rect.center = position
+        elif align == "right":
+            text_rect.topright = position
+        else:  # left align
+            text_rect.topleft = position
+
+        screen.blit(text_surface, text_rect)
+
     def show_start_menu(self, screen):
         """Show start menu screen"""
         screen.blit(self.background, (0, 0))
 
         # Title
-        font = get_font(64)
-        title = font.render("Snake Game", True, GAME_OVER_COLOR)
-        title_rect = title.get_rect()
-        title_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 50)
-        screen.blit(title, title_rect)
+        self.render_text(screen, "Snake Game", GAME_OVER_COLOR, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 50), 64, align="center")
 
         # Start instruction
-        font = get_font(32)
-        instruction = font.render("Press ENTER to Start", True, SCORE_COLOR)
-        instruction_rect = instruction.get_rect()
-        instruction_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 50)
-        screen.blit(instruction, instruction_rect)
+        self.render_text(screen, "Press ENTER to Start", SCORE_COLOR, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 50), align="center")
 
     def show_game_over(self, screen, score, high_score):
         """Show game over screen"""
         screen.blit(self.background, (0, 0))
 
-        font = get_font(64)
-        text = font.render("Game Over!", True, GAME_OVER_COLOR)
-        text_rect = text.get_rect()
-        text_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 50)
-        screen.blit(text, text_rect)
+        # Game Over text
+        self.render_text(screen, "Game Over!", GAME_OVER_COLOR, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 50), 64, align="center")
 
-        font = get_font(32)
-        score_text = font.render(f"Score: {score}", True, SCORE_COLOR)
-        score_rect = score_text.get_rect()
-        score_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 50)
-        screen.blit(score_text, score_rect)
+        # Score texts
+        self.render_text(screen, f"Score: {score}", SCORE_COLOR, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 50), align="center")
+        self.render_text(screen, f"High Score: {high_score}", SCORE_COLOR, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2), align="center")
 
-        high_score_text = font.render(f"High Score: {high_score}", True, SCORE_COLOR)
-        high_score_rect = high_score_text.get_rect()
-        high_score_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
-        screen.blit(high_score_text, high_score_rect)
+        # Restart text
+        self.render_text(screen, "Press ENTER to Restart", SCORE_COLOR, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 100), align="center")
 
-        restart_text = font.render("Press ENTER to Restart", True, SCORE_COLOR)
-        restart_rect = restart_text.get_rect()
-        restart_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 100)
-        screen.blit(restart_text, restart_rect)
-
-    def render_game(self, screen, snake, food, obstacles, score, high_score, screenshot_manager=None):
+    def render_game(self, screen, snake, food, obstacles, score, high_score, start_time, screenshot_manager=None):
         """Render the game screen with all components."""
         # Draw background with grid
         screen.blit(self.background, (0, 0))
@@ -94,10 +89,12 @@ class GameRenderer:
         obstacles.render(screen)
 
         # Draw scores
-        score_text = get_font(24).render(f"Score: {score}", True, SCORE_COLOR)
-        high_score_text = get_font(24).render(f"High Score: {high_score}", True, SCORE_COLOR)
-        screen.blit(score_text, (10, 10))
-        screen.blit(high_score_text, (WINDOW_WIDTH - high_score_text.get_width() - 10, 10))
+        self.render_text(screen, f"Score: {score}", SCORE_COLOR, (10, 10), 32, align="left")
+        self.render_text(screen, f"High Score: {high_score}", SCORE_COLOR, (WINDOW_WIDTH - 10, 10), 32, align="right")
+
+        # Calculate and render timer
+        elapsed_time = (pygame.time.get_ticks() - start_time) // 1000
+        self.render_text(screen, f"Time: {elapsed_time}s", SCORE_COLOR, (WINDOW_WIDTH // 2, 20), 32, align="center")
 
         if screenshot_manager:
             screenshot_manager.update(screen)
@@ -111,26 +108,15 @@ class GameRenderer:
         screen.blit(overlay, (0, 0))
 
         # Pause title
-        font = get_font(64)
-        title = font.render("PAUSED", True, GAME_OVER_COLOR)
-        title_rect = title.get_rect()
-        title_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 50)
-        screen.blit(title, title_rect)
+        self.render_text(screen, "PAUSED", GAME_OVER_COLOR, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 50), 64, align="center")
 
         # Score
-        font = get_font(32)
-        score_text = font.render(f"Current Score: {score}", True, SCORE_COLOR)
-        score_rect = score_text.get_rect()
-        score_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 20)
-        screen.blit(score_text, score_rect)
+        self.render_text(screen, f"Current Score: {score}", SCORE_COLOR, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 20), align="center")
 
         # Controls
-        font = get_font(24)
-        controls = ["Press ESC to Resume", "Press Q to Quit"]
-        for i, text in enumerate(controls):
-            control = font.render(text, True, SCORE_COLOR)
-            control_rect = control.get_rect()
-            control_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 80 + i * 30)
-            screen.blit(control, control_rect)
+        self.render_text(screen, "Press ESC to Resume", SCORE_COLOR, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 80), align="center")
+
+        # Quit
+        self.render_text(screen, "Press Q to Quit", SCORE_COLOR, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 110), align="center")
 
         pygame.display.flip()

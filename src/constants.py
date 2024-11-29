@@ -51,25 +51,28 @@ LEFT = (-1, 0)
 RIGHT = (1, 0)
 
 
-def get_font(size):
+def get_font(size, bold=True):
     # macOS system font paths
     system_fonts = [
-        "/System/Library/Fonts/PingFang.ttc",  # PingFang
-        "/System/Library/Fonts/STHeiti Light.ttc",  # Heiti
-        "/System/Library/Fonts/Hiragino Sans GB.ttc",  # Hiragino
+        "/Library/Fonts/Helvetica.ttc",  # Helvetica
+        "/Library/Fonts/Arial.ttf",  # Arial
     ]
 
     # Try to load system fonts
     for font_path in system_fonts:
         if os.path.exists(font_path):
             try:
-                return pygame.font.Font(font_path, size)
+                font = pygame.font.Font(font_path, size)
+                font.set_bold(bold)
+                return font
             except (pygame.error, OSError) as e:
                 logging.error("Failed to load font %s: %s", font_path, str(e))
                 continue
 
-    # If no Chinese fonts found, use default font
-    return pygame.font.Font(None, size)
+    # If no fonts found, use default font
+    font = pygame.font.Font(None, size)
+    font.set_bold(bold)
+    return font
 
 
 def draw_rounded_rect(surface, color, rect, radius):
