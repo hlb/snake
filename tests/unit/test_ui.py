@@ -112,3 +112,74 @@ class TestGameRenderer(unittest.TestCase):
 
         # Check if the screen is not empty (has some non-background pixels)
         self.assertTrue((pixel_array != BACKGROUND).any())
+
+    def test_pause_menu_rendering(self):
+        """Test pause menu rendering."""
+        score = 100
+        self.renderer.show_pause_menu(self.screen, score)
+
+        # Get the screen's pixel array to verify rendering
+        pixel_array = pygame.surfarray.array3d(self.screen)
+        self.assertTrue((pixel_array != BACKGROUND).any())
+
+    def test_game_rendering_with_screenshot(self):
+        """Test game rendering with screenshot manager."""
+
+        class MockObject:
+            def render(self, screen):
+                pass
+
+            def get_head(self):
+                return (100, 100)
+
+            def get_body(self):
+                return [(90, 100), (80, 100)]
+
+        snake = MockObject()
+        food = MockObject()
+        obstacles = MockObject()
+        screenshot_manager = Screenshot()
+
+        # Test rendering with screenshot manager
+        self.renderer.render_game(self.screen, snake, food, obstacles, score=100, high_score=200, screenshot_manager=screenshot_manager)
+
+        # Verify screen has been modified
+        pixel_array = pygame.surfarray.array3d(self.screen)
+        self.assertTrue((pixel_array != BACKGROUND).any())
+
+        # Clean up screenshot directory
+        if os.path.exists(screenshot_manager.directory):
+            for file in os.listdir(screenshot_manager.directory):
+                os.remove(os.path.join(screenshot_manager.directory, file))
+            os.rmdir(screenshot_manager.directory)
+
+    def test_cached_background(self):
+        """Test that background is properly cached."""
+        # Get initial background state
+        initial_background = pygame.surfarray.array3d(self.renderer.background)
+
+        # Create new renderer
+        new_renderer = GameRenderer()
+        new_background = pygame.surfarray.array3d(new_renderer.background)
+
+        # Verify backgrounds are identical
+        self.assertTrue((initial_background == new_background).all())
+
+    def test_font_rendering(self):
+        """Test font rendering in different game states."""
+        # Test start menu text
+        self.renderer.show_start_menu(self.screen)
+        start_screen = pygame.surfarray.array3d(self.screen)
+        self.assertTrue((start_screen != BACKGROUND).any())
+
+        # Test game over text
+        self.renderer.show_game_over(self.screen, score=100, high_score=200)
+        game_over_screen = pygame.surfarray.array3d(self.screen)
+        self.assertTrue((game_over_screen != BACKGROUND).any())
+        self.assertFalse((game_over_screen == start_screen).all())
+
+        # Test pause menu text
+        self.renderer.show_pause_menu(self.screen, score=100)
+        pause_screen = pygame.surfarray.array3d(self.screen)
+        self.assertTrue((pause_screen != BACKGROUND).any())
+        self.assertFalse((pause_screen == game_over_screen).all())

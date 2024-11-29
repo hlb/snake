@@ -1,5 +1,9 @@
+import unittest
+import pygame
+from src.snake import Snake
+from src.obstacle import Obstacle
 from tests.test_base import SnakeGameTest
-from src import GRID_WIDTH, GRID_HEIGHT, LEFT, RIGHT
+from src import GRID_WIDTH, GRID_HEIGHT, LEFT, RIGHT, GRID_SIZE
 
 
 # pylint: disable=protected-access
@@ -45,3 +49,47 @@ class TestSnake(SnakeGameTest):
         self.snake.length += 1
         self.snake.update(self.obstacles)
         self.assertEqual(len(self.snake.positions), initial_length + 1)
+
+    def test_snake_rendering(self):
+        """Test snake rendering functionality."""
+        # Create a test screen surface
+        screen = pygame.Surface((GRID_WIDTH * GRID_SIZE, GRID_HEIGHT * GRID_SIZE))
+
+        # Test rendering
+        self.snake.render(screen)
+
+        # Verify particle surface was created
+        self.assertIsNotNone(self.snake.particle_surface)
+
+        # Verify cached segment surfaces
+        self.assertTrue(len(self.snake.cached_segment_surfaces) > 0)
+        for color in self.snake.effects.gradient_colors:
+            self.assertIn(color, self.snake.cached_segment_surfaces)
+
+    def test_snake_effects_timing(self):
+        """Test snake effects timing system."""
+        # Store initial speed and set up effect
+        initial_speed = self.snake.speed
+        self.snake.effects.base_speed = initial_speed
+        self.snake.speed = initial_speed + 2
+        self.snake.effects.effect_end_time = pygame.time.get_ticks() + 1000
+
+        # Update snake (effect should still be active)
+        self.snake.update(self.obstacles)
+        self.assertEqual(self.snake.speed, initial_speed + 2)
+
+        # Set effect end time to past
+        self.snake.effects.effect_end_time = pygame.time.get_ticks() - 1
+
+        # Update snake (effect should end)
+        self.snake.update(self.obstacles)
+        self.assertEqual(self.snake.speed, initial_speed)
+
+    def test_food_effect_handling(self):
+        """Test handling of food effects."""
+        initial_speed = self.snake.speed
+        food_properties = {"speed_change": 2, "duration": 1000}
+        self.snake.handle_food_effect(food_properties)
+        self.assertEqual(self.snake.speed, initial_speed + 2)
+        self.assertEqual(self.snake.effects.base_speed, initial_speed)
+        self.assertGreater(self.snake.effects.effect_end_time, pygame.time.get_ticks())
