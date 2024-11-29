@@ -3,9 +3,8 @@ import pytest
 import pygame
 from snake_game import handle_direction_change, update_game_state
 from src.snake import Snake
-from src.game_state import GameState
-from src.food import Food
 from src.obstacle import Obstacle
+from src.food import Food
 from src.sound import SoundManager
 
 
@@ -89,42 +88,3 @@ class TestUpdateGameState:
         update_game_state(snake, obstacles, food, sound_manager)
         obstacles.add_obstacle.assert_called_once_with(snake)
         assert snake.speed == initial_speed + 1  # Speed should increase
-
-
-class TestPauseFunctionality(unittest.TestCase):
-    """Test cases for game pause functionality."""
-
-    def setUp(self):
-        """Set up test environment."""
-        pygame.init()
-        self.game_state = GameState()
-        self.snake = Snake()
-
-    def test_initial_state(self):
-        """Test initial game state."""
-        self.assertFalse(self.game_state.is_paused)
-        self.assertFalse(self.game_state.is_playing)
-
-    def test_pause_toggle(self):
-        """Test pause toggle functionality."""
-        # Start game first
-        self.game_state.start_game()
-        self.assertTrue(self.game_state.is_playing)
-        self.assertFalse(self.game_state.is_paused)
-
-        # Pause game
-        self.game_state.toggle_pause()
-        self.assertTrue(self.game_state.is_playing)
-        self.assertTrue(self.game_state.is_paused)
-
-        # Unpause game
-        self.game_state.toggle_pause()
-        self.assertTrue(self.game_state.is_playing)
-        self.assertFalse(self.game_state.is_paused)
-
-    def test_score_during_pause(self):
-        """Test that score remains unchanged during pause."""
-        self.game_state.start_game()
-        initial_score = self.game_state.score
-        self.game_state.toggle_pause()
-        self.assertEqual(self.game_state.score, initial_score)

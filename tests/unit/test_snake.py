@@ -1,9 +1,6 @@
-import unittest
 import pygame
-from src.snake import Snake
-from src.obstacle import Obstacle
-from tests.test_base import SnakeGameTest
 from src import GRID_WIDTH, GRID_HEIGHT, LEFT, RIGHT, GRID_SIZE
+from tests.test_base import SnakeGameTest
 
 
 # pylint: disable=protected-access
