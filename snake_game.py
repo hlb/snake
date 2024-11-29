@@ -1,12 +1,6 @@
 import argparse
 import pygame
-from src import (
-    Snake,
-    Food,
-    Obstacle,
-    WINDOW_WIDTH,
-    WINDOW_HEIGHT,
-)
+from src import Snake, Food, Obstacle, WINDOW_WIDTH, WINDOW_HEIGHT
 from src.sound import SoundManager
 from src.ui import GameRenderer, Screenshot
 from src.game_state import GameState
@@ -96,25 +90,35 @@ def main():
                     obstacles = Obstacle()
                     food = Food(obstacles)
                     game_state.start_game()
-                elif game_state.is_playing:
+                if event.key == pygame.K_ESCAPE and game_state.is_playing:
+                    game_state.toggle_pause()
+                    if game_state.is_paused:
+                        sound_manager.pause_background_music()
+                    else:
+                        sound_manager.resume_background_music()
+                if game_state.is_playing and not game_state.is_paused:
                     handle_direction_change(event.key, snake)
 
-        # Update game state based on current state
-        if not game_state.is_playing and not game_state.is_game_over:
-            renderer.show_start_menu(game_screen)
+        # Update game state
+        if game_state.is_playing and not game_state.is_paused:
+            if update_game_state(snake, obstacles, food, sound_manager, args.screenshots, screenshot_manager):
+                game_state.end_game()
+
+        # Render current frame
+        if game_state.is_playing:
+            renderer.render_game(game_screen, snake, food, obstacles, snake.score if snake else 0, game_state.high_score, screenshot_manager)
+            if game_state.is_paused:
+                renderer.show_pause_menu(game_screen, snake.score)
         elif game_state.is_game_over:
             renderer.show_game_over(game_screen, game_state.score, game_state.high_score)
-        else:  # Game is running
-            # Update game state
-            game_over = update_game_state(snake, obstacles, food, sound_manager, enable_screenshots=args.screenshots, screenshot_manager=screenshot_manager)
+        else:  # Game is not started
+            renderer.show_start_menu(game_screen)
 
-            if game_over:
-                game_state.end_game()
-            else:
-                game_state.update_score(snake.score)
-                renderer.render_game(game_screen, snake, food, obstacles, score=game_state.score, high_score=game_state.high_score, screenshot_manager=screenshot_manager)
+        # Update display once per frame
+        pygame.display.flip()
 
-            clock.tick(snake.speed)
+        # Control game speed
+        clock.tick(snake.speed if snake and game_state.is_playing and not game_state.is_paused else 30)
 
 
 if __name__ == "__main__":

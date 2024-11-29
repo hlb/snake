@@ -71,7 +71,7 @@ class TestGameRenderer(unittest.TestCase):
 
     def test_start_menu_rendering(self):
         """Test start menu rendering."""
-        GameRenderer.show_start_menu(self.screen)
+        self.renderer.show_start_menu(self.screen)
 
         # Get the screen's pixel array
         pixel_array = pygame.surfarray.array3d(self.screen)
@@ -83,7 +83,7 @@ class TestGameRenderer(unittest.TestCase):
         """Test game over screen rendering."""
         score = 100
         high_score = 200
-        GameRenderer.show_game_over(self.screen, score, high_score)
+        self.renderer.show_game_over(self.screen, score, high_score)
 
         # Get the screen's pixel array
         pixel_array = pygame.surfarray.array3d(self.screen)
@@ -105,7 +105,7 @@ class TestGameRenderer(unittest.TestCase):
         food = MockObject()
         obstacles = MockObject()
 
-        GameRenderer.render_game(self.screen, snake, food, obstacles, score=score, high_score=high_score)
+        self.renderer.render_game(self.screen, snake, food, obstacles, score, high_score)
 
         # Get the screen's pixel array
         pixel_array = pygame.surfarray.array3d(self.screen)

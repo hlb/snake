@@ -5,6 +5,7 @@ class GameState:
         self.start_time = 0
         self.is_game_over = False
         self.is_playing = False
+        self.is_paused = False
 
     def load_high_score(self):
         """Load the high score from file."""
@@ -33,15 +34,18 @@ class GameState:
         self.score = 0
         self.is_game_over = False
         self.is_playing = True
+        self.is_paused = False
 
     def end_game(self):
         """End the current game."""
         self.is_game_over = True
         self.is_playing = False
+        self.is_paused = False
         if self.score > self.high_score:
             self.high_score = self.score
             self.save_high_score()
 
     def toggle_pause(self):
         """Toggle the game's pause state."""
-        self.is_playing = not self.is_playing
+        if self.is_playing and not self.is_game_over:
+            self.is_paused = not self.is_paused

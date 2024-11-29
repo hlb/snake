@@ -46,6 +46,11 @@ class Snake:
         self.particle_system = ParticleSystem()
         self._initialize_snake()
 
+        # Create cached surfaces for rendering
+        self.particle_surface = pygame.Surface((GRID_WIDTH * GRID_SIZE, GRID_HEIGHT * GRID_SIZE), pygame.SRCALPHA)
+        self.cached_segment_surfaces = {}
+        self._create_cached_segments()
+
     def _initialize_snake(self):
         """Initialize or reset snake's position and length."""
         self.length = 3
@@ -57,6 +62,14 @@ class Snake:
         dx, dy = self.direction
         for i in range(1, self.length):
             self.positions.append(((center[0] - dx * i) % GRID_WIDTH, (center[1] - dy * i) % GRID_HEIGHT))
+
+    def _create_cached_segments(self):
+        """Create cached surfaces for snake segments with different colors."""
+        for color in self.effects.gradient_colors:
+            surface = pygame.Surface((GRID_SIZE, GRID_SIZE), pygame.SRCALPHA)
+            rect = pygame.Rect(2, 2, GRID_SIZE - 4, GRID_SIZE - 4)
+            draw_rounded_rect(surface, color, rect, 10)
+            self.cached_segment_surfaces[color] = surface
 
     def get_head_position(self):
         """Return the position of snake's head."""
@@ -107,20 +120,22 @@ class Snake:
 
     def render(self, screen):
         """Render the snake on the screen."""
-        # Update and render particles
-        self.particle_system.update()
-        self.particle_system.render(screen)
+        # Clear particle surface
+        self.particle_surface.fill((0, 0, 0, 0))
 
-        # Render snake with gradient
+        # Update and render particles to particle surface
+        self.particle_system.update()
+        self.particle_system.render(self.particle_surface)
+
+        # Draw particle surface
+        screen.blit(self.particle_surface, (0, 0))
+
+        # Render snake with gradient using cached surfaces
         for i, pos in enumerate(self.positions):
             # Calculate gradient color based on position in snake
             gradient_index = (i * len(self.effects.gradient_colors)) // len(self.positions)
             color = self.effects.gradient_colors[min(gradient_index, len(self.effects.gradient_colors) - 1)]
 
-            rect = pygame.Rect(
-                pos[0] * GRID_SIZE + 2,
-                pos[1] * GRID_SIZE + 2,
-                GRID_SIZE - 4,
-                GRID_SIZE - 4,
-            )
-            draw_rounded_rect(screen, color, rect, 10)
+            # Use cached surface for this color
+            segment_surface = self.cached_segment_surfaces[color]
+            screen.blit(segment_surface, (pos[0] * GRID_SIZE, pos[1] * GRID_SIZE))

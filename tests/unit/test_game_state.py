@@ -72,10 +72,21 @@ class TestGameState(unittest.TestCase):
 
     def test_toggle_pause(self):
         """Test game pause toggling."""
+        # Game should start in non-playing state
         self.assertFalse(self.game_state.is_playing)
+        self.assertFalse(self.game_state.is_paused)
 
+        # Start the game
+        self.game_state.start_game()
+        self.assertTrue(self.game_state.is_playing)
+        self.assertFalse(self.game_state.is_paused)
+
+        # Pause the game
+        self.game_state.toggle_pause()
+        self.assertTrue(self.game_state.is_playing)  # Game should still be "playing"
+        self.assertTrue(self.game_state.is_paused)  # But in paused state
+
+        # Unpause the game
         self.game_state.toggle_pause()
         self.assertTrue(self.game_state.is_playing)
-
-        self.game_state.toggle_pause()
-        self.assertFalse(self.game_state.is_playing)
+        self.assertFalse(self.game_state.is_paused)

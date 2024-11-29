@@ -33,11 +33,15 @@ class Screenshot:
 
 
 class GameRenderer:
-    @staticmethod
-    def show_start_menu(screen):
+    def __init__(self):
+        """Initialize the game renderer with a cached background"""
+        self.background = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.background.fill(BACKGROUND)
+        draw_grid(self.background)
+
+    def show_start_menu(self, screen):
         """Show start menu screen"""
-        screen.fill(BACKGROUND)
-        draw_grid(screen)
+        screen.blit(self.background, (0, 0))
 
         # Title
         font = get_font(64)
@@ -53,11 +57,10 @@ class GameRenderer:
         instruction_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 50)
         screen.blit(instruction, instruction_rect)
 
-        pygame.display.flip()
-
-    @staticmethod
-    def show_game_over(screen, score, high_score):
+    def show_game_over(self, screen, score, high_score):
         """Show game over screen"""
+        screen.blit(self.background, (0, 0))
+
         font = get_font(64)
         text = font.render("Game Over!", True, GAME_OVER_COLOR)
         text_rect = text.get_rect()
@@ -80,15 +83,12 @@ class GameRenderer:
         restart_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 100)
         screen.blit(restart_text, restart_rect)
 
-        pygame.display.flip()
-
-    @staticmethod
-    def render_game(screen, snake, food, obstacles, score, high_score, screenshot_manager=None):
+    def render_game(self, screen, snake, food, obstacles, score, high_score, screenshot_manager=None):
         """Render the game screen with all components."""
-        screen.fill(BACKGROUND)
-        draw_grid(screen)
+        # Draw background with grid
+        screen.blit(self.background, (0, 0))
 
-        # Render game objects
+        # Game objects
         snake.render(screen)
         food.render(screen)
         obstacles.render(screen)
@@ -101,5 +101,36 @@ class GameRenderer:
 
         if screenshot_manager:
             screenshot_manager.update(screen)
+
+    def show_pause_menu(self, screen, score):
+        """Show pause menu screen"""
+        # Semi-transparent overlay
+        overlay = pygame.Surface((WINDOW_WIDTH, WINDOW_HEIGHT))
+        overlay.fill((0, 0, 0))
+        overlay.set_alpha(128)
+        screen.blit(overlay, (0, 0))
+
+        # Pause title
+        font = get_font(64)
+        title = font.render("PAUSED", True, GAME_OVER_COLOR)
+        title_rect = title.get_rect()
+        title_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 50)
+        screen.blit(title, title_rect)
+
+        # Score
+        font = get_font(32)
+        score_text = font.render(f"Current Score: {score}", True, SCORE_COLOR)
+        score_rect = score_text.get_rect()
+        score_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 20)
+        screen.blit(score_text, score_rect)
+
+        # Controls
+        font = get_font(24)
+        controls = ["Press ESC to Resume", "Press Q to Quit"]
+        for i, text in enumerate(controls):
+            control = font.render(text, True, SCORE_COLOR)
+            control_rect = control.get_rect()
+            control_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 80 + i * 30)
+            screen.blit(control, control_rect)
 
         pygame.display.flip()

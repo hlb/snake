@@ -55,6 +55,16 @@ class SoundManager:
             except Exception as e:
                 print(f"Failed to play background music: {str(e)}")
 
+    def pause_background_music(self):
+        """Pause background music."""
+        if self.background_music:
+            self.background_channel.pause()
+
+    def resume_background_music(self):
+        """Resume background music."""
+        if self.background_music:
+            self.background_channel.unpause()
+
     def play_eat_sound(self):
         """Play the eating sound effect."""
         if self.eat_sound:
