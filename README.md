@@ -37,6 +37,7 @@ python snake_game.py --screenshots
 | ↓ | Move down |
 | ← | Move left |
 | → | Move right |
+| ESC | Pause/Resume game |
 | Q | Quit game |
 
 ### Power-ups and Scoring
@@ -117,4 +118,3 @@ To run code coverage:
 ```bash
 python -m pytest --cov=.
 coverage html  # generates HTML report in htmlcov/
-```
