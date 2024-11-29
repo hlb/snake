@@ -50,7 +50,6 @@ def update_game_state(snake, obstacles, food, sound_manager, game_state, enable_
 def main():
     # Initialize start_time with current ticks
     game_state = GameState()
-    game_state.start_time = pygame.time.get_ticks()
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="Snake Game")
@@ -91,7 +90,6 @@ def main():
                     obstacles = Obstacle()
                     food = Food(obstacles)
                     game_state.start_game()
-                    game_state.start_time = pygame.time.get_ticks()  # Reset start_time
                 if event.key == pygame.K_ESCAPE and game_state.is_playing:
                     game_state.toggle_pause()
                     if game_state.is_paused:
