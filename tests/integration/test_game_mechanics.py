@@ -5,6 +5,7 @@ from pygame.locals import K_UP, K_DOWN
 from tests.test_base import SnakeGameTest
 from src import Snake, Food, Obstacle, FOOD_TYPES, UP, RIGHT
 from src.constants import NORMAL_FOOD_COLOR, GOLDEN_APPLE_COLOR, SPEED_FRUIT_COLOR, SLOW_FRUIT_COLOR
+from src.game_state import GameState
 from snake_game import handle_direction_change, update_game_state
 
 
@@ -29,14 +30,16 @@ class TestGameMechanics(SnakeGameTest):
     def test_game_reset(self):
         """Test game reset functionality."""
         # Modify game state
-        self.snake.score = 100
+        self.game_state = GameState()
+        self.game_state.score = 100
         self.snake.positions = [(1, 1)]
 
         # Reset game by creating new snake
         self.snake = Snake()
+        self.game_state = GameState()
 
         # Verify reset state
-        self.assertEqual(self.snake.score, 0)
+        self.assertEqual(self.game_state.score, 0)
         self.assertEqual(len(self.snake.positions), 3)
         self.assert_valid_direction(self.snake.direction)
 
@@ -57,7 +60,7 @@ class TestGameMechanics(SnakeGameTest):
         self.snake.positions = [(5, 5), (4, 5), (3, 5)]  # Snake facing right
         self.snake.direction = RIGHT
         self.snake.length = 3
-        self.snake.score = 0
+        self.game_state = GameState()
 
         # Create a food item right in front of the snake
         food_pos = (6, 5)
@@ -68,24 +71,25 @@ class TestGameMechanics(SnakeGameTest):
         self.food.foods = [food_item]
 
         # Get initial score
-        initial_score = self.snake.score
+        initial_score = self.game_state.score
         print(f"\nInitial snake head: {self.snake.positions[0]}")
         print(f"Food position: {food_pos}")
         print(f"Initial score: {initial_score}")
 
         # Update game state (this will also update snake position)
-        update_game_state(self.snake, self.obstacles, self.food, self.sound_manager)  # Handle food collision
+        update_game_state(self.snake, self.obstacles, self.food, self.sound_manager, self.game_state)  # Handle food collision
         print(f"After game state update snake head: {self.snake.positions[0]}")
-        print(f"Final score: {self.snake.score}")
+        print(f"Final score: {self.game_state.score}")
 
         # Verify food collection
-        self.assertTrue(self.snake.score > initial_score)
+        self.assertTrue(self.game_state.score > initial_score)
 
     def test_speed_effects(self):
         """Test speed-related food effects."""
         # Test speed boost food
         self.snake = self.create_test_snake_at((5, 5), RIGHT)
         initial_speed = self.snake.speed
+        self.game_state = GameState()
 
         # Create speed boost food in snake's path
         self.food.foods = [self.food._create_food_item((6, 5))]
@@ -93,12 +97,13 @@ class TestGameMechanics(SnakeGameTest):
         self.food.foods[0].properties = FOOD_TYPES["speed"]
 
         # Update game state and verify speed increase
-        update_game_state(self.snake, self.obstacles, self.food, self.sound_manager)
+        update_game_state(self.snake, self.obstacles, self.food, self.sound_manager, self.game_state)
         self.assertEqual(self.snake.speed, initial_speed + 2)
 
         # Test slow down food
         self.snake = self.create_test_snake_at((5, 5), RIGHT)
         initial_speed = self.snake.speed
+        self.game_state = GameState()
 
         # Create slow down food in snake's path
         self.food.foods = [self.food._create_food_item((6, 5))]
@@ -106,7 +111,7 @@ class TestGameMechanics(SnakeGameTest):
         self.food.foods[0].properties = FOOD_TYPES["slow"]
 
         # Update game state and verify speed decrease
-        update_game_state(self.snake, self.obstacles, self.food, self.sound_manager)
+        update_game_state(self.snake, self.obstacles, self.food, self.sound_manager, self.game_state)
         self.assertEqual(self.snake.speed, initial_speed - 2)
 
 
@@ -117,12 +122,13 @@ def setup_game():
     snake = Snake()
     obstacles = Obstacle()
     food = Food(obstacles)
-    return snake, food, obstacles, screen
+    game_state = GameState()
+    return snake, food, obstacles, screen, game_state
 
 
 def test_food_creation(setup_game):
     """Test that food items are created with correct properties"""
-    _, food, _, _ = setup_game
+    _, food, _, _, _ = setup_game
 
     # Check initial food count
     assert len(food.foods) == 3
@@ -137,7 +143,7 @@ def test_food_creation(setup_game):
 
 def test_food_colors(setup_game):
     """Test that food items have correct colors"""
-    _, food, _, _ = setup_game
+    _, food, _, _, _ = setup_game
 
     color_map = {
         "normal": NORMAL_FOOD_COLOR,
@@ -152,7 +158,7 @@ def test_food_colors(setup_game):
 
 def test_food_collision_effects(setup_game):
     """Test that food collision triggers correct effects"""
-    snake, food, obstacles, _ = setup_game
+    snake, food, obstacles, _, game_state = setup_game
 
     # Mock sound manager
     class MockSoundManager:
@@ -168,7 +174,7 @@ def test_food_collision_effects(setup_game):
     for food_type in ["normal", "golden", "speed", "slow"]:
         # Reset snake speed to initial value
         snake.speed = 6
-        snake.score = 0  # Reset score
+        game_state.score = 0  # Reset score
         initial_speed = snake.speed
         print(f"\nTesting {food_type} food:")
         print(f"Initial speed: {initial_speed}")
@@ -186,27 +192,27 @@ def test_food_collision_effects(setup_game):
         snake.length = 1  # Set length to 1 to avoid self-collision
 
         # Simulate collision and update game state
-        update_game_state(snake, obstacles, food, sound_manager)
+        update_game_state(snake, obstacles, food, sound_manager, game_state)
         print(f"Speed after effect: {snake.speed}")
-        print(f"Score: {snake.score}")
+        print(f"Score: {game_state.score}")
         print(f"Snake positions: {snake.positions}")
 
         if food_type == "normal":
             assert snake.speed == initial_speed
-            assert snake.score == 1  # Normal food gives 1 point
+            assert game_state.score == 1  # Normal food gives 1 point
         elif food_type == "golden":
-            assert snake.score == 2  # Golden food gives 2 points
+            assert game_state.score == 2  # Golden food gives 2 points
         elif food_type == "speed":
             assert snake.speed > initial_speed
-            assert snake.score == 1  # Speed food gives 1 point
+            assert game_state.score == 1  # Speed food gives 1 point
         elif food_type == "slow":
             assert snake.speed < initial_speed
-            assert snake.score == 1  # Slow food gives 1 point
+            assert game_state.score == 1  # Slow food gives 1 point
 
 
 def test_particle_effects(setup_game):
     """Test that particle effects are created on food collision"""
-    _, food, _, screen = setup_game
+    _, food, _, screen, _ = setup_game
 
     # Create a food item and trigger collision
     food_pos = (5, 5)
@@ -240,7 +246,7 @@ def test_particle_effects(setup_game):
 
 def test_food_emoji_assignment(setup_game):
     """Test that food items are assigned correct emojis"""
-    _, food, _, _ = setup_game
+    _, food, _, _, _ = setup_game
 
     emoji_categories = {
         "normal": ["🍕", "🍇", "🍪", "🍓"],
@@ -255,7 +261,7 @@ def test_food_emoji_assignment(setup_game):
 
 def test_food_distribution(setup_game):
     """Test the distribution of food types"""
-    _, food, _, _ = setup_game
+    _, food, _, _, _ = setup_game
 
     # Create many food items to test probability distribution
     food_types = {"normal": 0, "golden": 0, "speed": 0, "slow": 0}

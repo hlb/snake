@@ -20,21 +20,19 @@ def handle_direction_change(key, snake):
         snake.direction = directions[key][0]
 
 
-def update_game_state(snake, obstacles, food, sound_manager, enable_screenshots=False, screenshot_manager=None):
+def update_game_state(snake, obstacles, food, sound_manager, game_state, enable_screenshots=False, screenshot_manager=None):
     """Update game state and handle collisions."""
     # Check for collision with obstacles or self
     if snake.update(obstacles):
         sound_manager.play_crash_sound()
         return True
 
-    # Check for collision with any food
-    head_pos = snake.get_head_position()
-    food_properties = food.check_collision(head_pos)
-
+    # Check for collision with food
+    food_properties = food.check_collision(snake.get_head_position())
     if food_properties:
         sound_manager.play_eat_sound()
         snake.length += food_properties["points"]
-        snake.score += food_properties["points"]  # Update score when eating food
+        game_state.update_score(game_state.score + food_properties["points"])  # Update score directly in game_state
         snake.handle_food_effect(food_properties)
 
         # Schedule screenshot if enabled
@@ -42,7 +40,7 @@ def update_game_state(snake, obstacles, food, sound_manager, enable_screenshots=
             screenshot_manager.schedule()
 
         # Add new obstacle every 10 points
-        if snake.score % 10 == 0:
+        if game_state.score % 10 == 0:
             obstacles.add_obstacle(snake)
             snake.speed += 1
 
@@ -50,6 +48,10 @@ def update_game_state(snake, obstacles, food, sound_manager, enable_screenshots=
 
 
 def main():
+    # Initialize start_time with current ticks
+    game_state = GameState()
+    game_state.start_time = pygame.time.get_ticks()
+
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="Snake Game")
     parser.add_argument("--screenshots", action="store_true", help="Enable screenshots when snake eats food")
@@ -62,7 +64,6 @@ def main():
 
     # Initialize managers
     sound_manager = SoundManager()
-    game_state = GameState()
     renderer = GameRenderer()
     screenshot_manager = Screenshot() if args.screenshots else None
 
@@ -90,6 +91,7 @@ def main():
                     obstacles = Obstacle()
                     food = Food(obstacles)
                     game_state.start_game()
+                    game_state.start_time = pygame.time.get_ticks()  # Reset start_time
                 if event.key == pygame.K_ESCAPE and game_state.is_playing:
                     game_state.toggle_pause()
                     if game_state.is_paused:
@@ -101,14 +103,14 @@ def main():
 
         # Update game state
         if game_state.is_playing and not game_state.is_paused:
-            if update_game_state(snake, obstacles, food, sound_manager, args.screenshots, screenshot_manager):
+            if update_game_state(snake, obstacles, food, sound_manager, game_state, args.screenshots, screenshot_manager):
                 game_state.end_game()
 
         # Render current frame
         if game_state.is_playing:
-            renderer.render_game(game_screen, snake, food, obstacles, snake.score if snake else 0, game_state.high_score, screenshot_manager)
+            renderer.render_game(game_screen, snake, food, obstacles, game_state.score, game_state.high_score, game_state.start_time, screenshot_manager)
             if game_state.is_paused:
-                renderer.show_pause_menu(game_screen, snake.score)
+                renderer.show_pause_menu(game_screen, game_state.score)
         elif game_state.is_game_over:
             renderer.show_game_over(game_screen, game_state.score, game_state.high_score)
         else:  # Game is not started

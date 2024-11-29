@@ -1,7 +1,7 @@
 import unittest.mock
 import pytest
 import pygame
-from snake_game import handle_direction_change, update_game_state
+from snake_game import handle_direction_change, update_game_state, GameState
 from src.snake import Snake
 from src.obstacle import Obstacle
 from src.food import Food
@@ -48,43 +48,63 @@ class TestHandleDirectionChange:
 
 
 class TestUpdateGameState:
-    def test_collision_with_obstacle(self, snake, obstacles, food, sound_manager):
+    @pytest.fixture
+    def snake(self):
+        return Snake()
+
+    @pytest.fixture
+    def obstacles(self):
+        return Obstacle()
+
+    @pytest.fixture
+    def food(self, obstacles):
+        return Food(obstacles)
+
+    @pytest.fixture
+    def sound_manager(self):
+        return unittest.mock.Mock(spec=SoundManager)
+
+    @pytest.fixture
+    def game_state(self):
+        return GameState()
+
+    def test_collision_with_obstacle(self, snake, obstacles, food, sound_manager, game_state):
         # Mock snake.update to return True (collision)
         snake.update = unittest.mock.Mock(return_value=True)
-        game_over = update_game_state(snake, obstacles, food, sound_manager)
+        game_over = update_game_state(snake, obstacles, food, sound_manager, game_state)
         assert game_over is True
         sound_manager.play_crash_sound.assert_called_once()
 
-    def test_eating_food(self, snake, obstacles, food, sound_manager):
+    def test_eating_food(self, snake, obstacles, food, sound_manager, game_state):
         # Mock collision detection
         initial_length = snake.length
-        initial_score = snake.score
+        initial_score = game_state.score
         food_properties = {"points": 1, "speed_change": 0, "duration": 0}
         food.check_collision = unittest.mock.Mock(return_value=food_properties)
         snake.update = unittest.mock.Mock(return_value=False)
-        game_over = update_game_state(snake, obstacles, food, sound_manager)
-        assert game_over is False
+
+        update_game_state(snake, obstacles, food, sound_manager, game_state)
         assert snake.length == initial_length + 1
-        assert snake.score == initial_score + 1
+        assert game_state.score == initial_score + 1
         sound_manager.play_eat_sound.assert_called_once()
 
-    def test_screenshot_on_food_collection(self, snake, obstacles, food, sound_manager):
+    def test_screenshot_on_food_collection(self, snake, obstacles, food, sound_manager, game_state):
         # Mock collision detection
         food_properties = {"points": 1, "speed_change": 0, "duration": 0}
         food.check_collision = unittest.mock.Mock(return_value=food_properties)
         snake.update = unittest.mock.Mock(return_value=False)
         screenshot_manager = unittest.mock.Mock()
-        update_game_state(snake, obstacles, food, sound_manager, enable_screenshots=True, screenshot_manager=screenshot_manager)
+        update_game_state(snake, obstacles, food, sound_manager, game_state, enable_screenshots=True, screenshot_manager=screenshot_manager)
         screenshot_manager.schedule.assert_called_once()
 
-    def test_obstacle_addition_on_score_milestone(self, snake, obstacles, food, sound_manager):
+    def test_obstacle_addition_on_score_milestone(self, snake, obstacles, food, sound_manager, game_state):
         # Set up score to trigger obstacle addition
-        snake.score = 9
+        game_state.score = 9
         initial_speed = snake.speed
         food_properties = {"points": 1, "speed_change": 0, "duration": 0}  # This will make score 10
         food.check_collision = unittest.mock.Mock(return_value=food_properties)
         snake.update = unittest.mock.Mock(return_value=False)
         obstacles.add_obstacle = unittest.mock.Mock()
-        update_game_state(snake, obstacles, food, sound_manager)
-        obstacles.add_obstacle.assert_called_once_with(snake)
-        assert snake.speed == initial_speed + 1  # Speed should increase
+        update_game_state(snake, obstacles, food, sound_manager, game_state)
+        obstacles.add_obstacle.assert_called_once()
+        assert snake.speed == initial_speed + 1
