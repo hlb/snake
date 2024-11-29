@@ -1,8 +1,9 @@
 import os
 import shutil
-import pygame
 from unittest import TestCase, main
-from snake_game import Screenshot
+import pygame
+
+from src.ui import Screenshot
 
 
 class TestScreenshot(TestCase):

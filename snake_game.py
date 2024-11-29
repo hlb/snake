@@ -1,5 +1,3 @@
-import os
-from datetime import datetime
 import argparse
 import pygame
 from src import (
@@ -8,161 +6,13 @@ from src import (
     Obstacle,
     WINDOW_WIDTH,
     WINDOW_HEIGHT,
-    BACKGROUND,
-    SCORE_COLOR,
-    GAME_OVER_COLOR,
-    get_font,
-    draw_grid,
 )
+from src.sound import SoundManager
+from src.ui import GameRenderer, Screenshot
+from src.game_state import GameState
 
 # Initialize Pygame
 pygame.init()
-
-# Initialize sound system
-pygame.mixer.quit()  # First close any running sound system
-pygame.mixer.init(44100, -16, 2, 2048)
-pygame.mixer.set_num_channels(8)  # Set more channels
-
-
-# Load sound effects
-def load_sound(file_path):
-    if not os.path.exists(file_path):
-        print(f"Sound file not found: {file_path}")
-        return None
-    try:
-        sound = pygame.mixer.Sound(file_path)
-        print(f"Successfully loaded sound: {file_path}")
-        return sound
-    except Exception as sound_load_error:
-        print(f"Failed to load sound file {file_path}: {str(sound_load_error)}")
-        return None
-
-
-# Set sound effects
-eat_sound = load_sound("sounds/eat.wav")
-crash_sound = load_sound("sounds/crash.wav")
-background_music = load_sound("sounds/background.mp3")
-
-# Set volume
-if eat_sound:
-    eat_sound.set_volume(0.4)
-if crash_sound:
-    crash_sound.set_volume(0.3)
-if background_music:
-    background_music.set_volume(0.8)
-    channel = pygame.mixer.Channel(0)
-    channel.set_volume(0.8)
-    try:
-        channel.play(background_music, loops=-1)
-        print("Background music started playing")
-    except Exception as e:
-        print(f"Failed to play background music: {str(e)}")
-
-
-class Screenshot:
-    delay_ms = 500
-
-    def __init__(self):
-        self.pending = False
-        self.scheduled_time = 0
-        self.directory = "screenshots"
-        os.makedirs(self.directory, exist_ok=True)
-
-    def schedule(self):
-        """Schedule a screenshot to be taken after delay_ms"""
-        self.pending = True
-        self.scheduled_time = pygame.time.get_ticks() + self.delay_ms
-
-    def update(self, screen):
-        """Check and take screenshot if scheduled time has passed"""
-        if not self.pending:
-            return
-
-        current_time = pygame.time.get_ticks()
-        if current_time >= self.scheduled_time:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            path = f"{self.directory}/snake_{timestamp}.png"
-            pygame.image.save(screen, path)
-            self.pending = False
-
-
-class GameState:
-    def __init__(self):
-        self.high_score = self.load_high_score()
-        self.start_time = 0
-        self.screenshot = Screenshot()  # Initialize screenshot manager
-
-    def load_high_score(self):
-        try:
-            with open("high_score.txt", "r", encoding="utf-8") as f:
-                return int(f.read())
-        except FileNotFoundError:
-            return 0
-        except ValueError:
-            return 0
-
-    def save_high_score(self, score):
-        with open("high_score.txt", "w", encoding="utf-8") as f:
-            f.write(str(score))
-
-
-# Create game window
-game_screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-pygame.display.set_caption("Modern Snake Game")
-clock = pygame.time.Clock()
-
-
-def show_start_menu(screen):
-    """Show start menu screen"""
-    screen.fill(BACKGROUND)
-    draw_grid(screen)
-
-    # Title
-    font = get_font(64)
-    title = font.render("Snake Game", True, GAME_OVER_COLOR)
-    title_rect = title.get_rect()
-    title_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 50)
-    screen.blit(title, title_rect)
-
-    # Start instruction
-    font = get_font(32)
-    instruction = font.render("Press ENTER to Start", True, SCORE_COLOR)
-    instruction_rect = instruction.get_rect()
-    instruction_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 50)
-    screen.blit(instruction, instruction_rect)
-
-    pygame.display.flip()
-
-
-def show_game_over(screen, score, game_state):
-    """Show game over screen"""
-    if score > game_state.high_score:
-        game_state.high_score = score
-        game_state.save_high_score(game_state.high_score)
-
-    font = get_font(64)
-    text = font.render("Game Over!", True, GAME_OVER_COLOR)
-    text_rect = text.get_rect()
-    text_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 50)
-    screen.blit(text, text_rect)
-
-    font = get_font(32)
-    score_text = font.render(f"Score: {score}", True, SCORE_COLOR)
-    score_rect = score_text.get_rect()
-    score_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 50)
-    screen.blit(score_text, score_rect)
-
-    high_score_text = font.render(f"High Score: {game_state.high_score}", True, SCORE_COLOR)
-    high_score_rect = high_score_text.get_rect()
-    high_score_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
-    screen.blit(high_score_text, high_score_rect)
-
-    restart_text = font.render("Press ENTER to Restart", True, SCORE_COLOR)
-    restart_rect = restart_text.get_rect()
-    restart_rect.center = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 100)
-    screen.blit(restart_text, restart_rect)
-
-    pygame.display.flip()
 
 
 def handle_direction_change(key, snake):
@@ -176,12 +26,11 @@ def handle_direction_change(key, snake):
         snake.direction = directions[key][0]
 
 
-def update_game_state(snake, obstacles, food, enable_screenshots=False, screenshot_manager=None):
+def update_game_state(snake, obstacles, food, sound_manager, enable_screenshots=False, screenshot_manager=None):
     """Update game state and handle collisions."""
     # Check for collision with obstacles or self
     if snake.update(obstacles):
-        if crash_sound:
-            crash_sound.play()
+        sound_manager.play_crash_sound()
         return True
 
     # Check for collision with any food
@@ -189,8 +38,7 @@ def update_game_state(snake, obstacles, food, enable_screenshots=False, screensh
     food_properties = food.check_collision(head_pos)
 
     if food_properties:
-        if eat_sound:
-            eat_sound.play()
+        sound_manager.play_eat_sound()
         snake.length += food_properties["points"]
         snake.score += food_properties["points"]  # Update score when eating food
         snake.handle_food_effect(food_properties)
@@ -207,93 +55,66 @@ def update_game_state(snake, obstacles, food, enable_screenshots=False, screensh
     return False
 
 
-def render_game(screen, snake, food, obstacles, game_over, game_state, screenshot_manager=None):
-    """Render the game state"""
-    screen.fill(BACKGROUND)
-    draw_grid(screen)
-
-    # Draw game objects
-    food.render(screen)
-    obstacles.render(screen)
-    snake.render(screen)
-
-    # Draw score
-    font = get_font(24)
-    score_text = font.render(f"Score: {snake.score}", True, SCORE_COLOR)
-    screen.blit(score_text, (10, 10))
-
-    # Draw high score
-    high_score_text = font.render(f"High Score: {game_state.high_score}", True, SCORE_COLOR)
-    high_score_rect = high_score_text.get_rect()
-    high_score_rect.topright = (WINDOW_WIDTH - 10, 10)
-    screen.blit(high_score_text, high_score_rect)
-
-    # Draw timer
-    current_time = pygame.time.get_ticks()
-    elapsed_time = current_time // 1000  # Convert to seconds
-    time_text = font.render(f"Time: {elapsed_time}s", True, SCORE_COLOR)
-    time_rect = time_text.get_rect()
-    time_rect.midtop = (WINDOW_WIDTH // 2, 10)
-    screen.blit(time_text, time_rect)
-
-    # Update and take screenshot if scheduled
-    if screenshot_manager:
-        screenshot_manager.update(screen)
-
-    if game_over:
-        show_game_over(screen, snake.score, game_state)
-    else:
-        pygame.display.flip()
-
-
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="Snake Game")
     parser.add_argument("--screenshots", action="store_true", help="Enable screenshots when snake eats food")
     args = parser.parse_args()
 
+    # Initialize game components
+    game_screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    pygame.display.set_caption("Modern Snake Game")
+    clock = pygame.time.Clock()
+
+    # Initialize managers
+    sound_manager = SoundManager()
     game_state = GameState()
+    renderer = GameRenderer()
     screenshot_manager = Screenshot() if args.screenshots else None
-    snake = Snake()
-    obstacles = Obstacle()
-    food = Food(obstacles)
-    game_over = False
-    game_started = False
-    game_state.start_time = pygame.time.get_ticks()
+
+    # Start background music
+    sound_manager.play_background_music()
+
+    # Game objects
+    snake = None
+    obstacles = None
+    food = None
 
     while True:
+        # Handle events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
-
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     pygame.quit()
                     return
-
-                if not game_started:
-                    if event.key == pygame.K_RETURN:
-                        game_started = True
-                        game_state.start_time = pygame.time.get_ticks()  # Reset start time when game starts
-                elif game_over:
-                    if event.key == pygame.K_RETURN:
-                        snake = Snake()
-                        food = Food(obstacles)
-                        game_over = False
-                        game_state.start_time = pygame.time.get_ticks()  # Reset start time on restart
-                else:
+                if event.key == pygame.K_RETURN and (not game_state.is_playing or game_state.is_game_over):
+                    # Start new game
+                    snake = Snake()
+                    obstacles = Obstacle()
+                    food = Food(obstacles)
+                    game_state.start_game()
+                elif game_state.is_playing:
                     handle_direction_change(event.key, snake)
 
-        if not game_started:
-            show_start_menu(game_screen)
-            continue
+        # Update game state based on current state
+        if not game_state.is_playing and not game_state.is_game_over:
+            renderer.show_start_menu(game_screen)
+        elif game_state.is_game_over:
+            renderer.show_game_over(game_screen, game_state.score, game_state.high_score)
+        else:  # Game is running
+            # Update game state
+            game_over = update_game_state(snake, obstacles, food, sound_manager, enable_screenshots=args.screenshots, screenshot_manager=screenshot_manager)
 
-        if not game_over:
-            game_over = update_game_state(snake, obstacles, food, args.screenshots, screenshot_manager)
+            if game_over:
+                game_state.end_game()
+            else:
+                game_state.update_score(snake.score)
+                renderer.render_game(game_screen, snake, food, obstacles, score=game_state.score, high_score=game_state.high_score, screenshot_manager=screenshot_manager)
 
-        render_game(game_screen, snake, food, obstacles, game_over, game_state, screenshot_manager)
-        clock.tick(snake.speed)
+            clock.tick(snake.speed)
 
 
 if __name__ == "__main__":

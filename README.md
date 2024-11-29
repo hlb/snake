@@ -90,9 +90,6 @@ The game features four types of collectible food items:
 ```
 snake/
 ├── src/               # Source code
-│   ├── snake.py      # Snake class and movement logic
-│   ├── food.py       # Food types and effects
-│   └── obstacle.py   # Obstacle generation and collision
 ├── tests/            # Test suite
 │   ├── unit/        # Unit tests
 │   └── integration/ # Integration tests

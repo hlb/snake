@@ -12,6 +12,20 @@ from snake_game import handle_direction_change, update_game_state
 class TestGameMechanics(SnakeGameTest):
     """Integration tests for game mechanics."""
 
+    def setUp(self):
+        """Set up test environment before each test."""
+        super().setUp()
+
+        # Create a mock sound manager
+        class MockSoundManager:
+            def play_eat_sound(self):
+                pass
+
+            def play_crash_sound(self):
+                pass
+
+        self.sound_manager = MockSoundManager()
+
     def test_game_reset(self):
         """Test game reset functionality."""
         # Modify game state
@@ -60,7 +74,7 @@ class TestGameMechanics(SnakeGameTest):
         print(f"Initial score: {initial_score}")
 
         # Update game state (this will also update snake position)
-        update_game_state(self.snake, self.obstacles, self.food)  # Handle food collision
+        update_game_state(self.snake, self.obstacles, self.food, self.sound_manager)  # Handle food collision
         print(f"After game state update snake head: {self.snake.positions[0]}")
         print(f"Final score: {self.snake.score}")
 
@@ -79,7 +93,7 @@ class TestGameMechanics(SnakeGameTest):
         self.food.foods[0].properties = FOOD_TYPES["speed"]
 
         # Update game state and verify speed increase
-        update_game_state(self.snake, self.obstacles, self.food)
+        update_game_state(self.snake, self.obstacles, self.food, self.sound_manager)
         self.assertEqual(self.snake.speed, initial_speed + 2)
 
         # Test slow down food
@@ -92,7 +106,7 @@ class TestGameMechanics(SnakeGameTest):
         self.food.foods[0].properties = FOOD_TYPES["slow"]
 
         # Update game state and verify speed decrease
-        update_game_state(self.snake, self.obstacles, self.food)
+        update_game_state(self.snake, self.obstacles, self.food, self.sound_manager)
         self.assertEqual(self.snake.speed, initial_speed - 2)
 
 
@@ -140,6 +154,16 @@ def test_food_collision_effects(setup_game):
     """Test that food collision triggers correct effects"""
     snake, food, obstacles, _ = setup_game
 
+    # Mock sound manager
+    class MockSoundManager:
+        def play_eat_sound(self):
+            pass
+
+        def play_crash_sound(self):
+            pass
+
+    sound_manager = MockSoundManager()
+
     # Test each food type
     for food_type in ["normal", "golden", "speed", "slow"]:
         # Reset snake speed to initial value
@@ -162,7 +186,7 @@ def test_food_collision_effects(setup_game):
         snake.length = 1  # Set length to 1 to avoid self-collision
 
         # Simulate collision and update game state
-        update_game_state(snake, obstacles, food)
+        update_game_state(snake, obstacles, food, sound_manager)
         print(f"Speed after effect: {snake.speed}")
         print(f"Score: {snake.score}")
         print(f"Snake positions: {snake.positions}")
