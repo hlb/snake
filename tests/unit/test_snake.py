@@ -10,7 +10,8 @@ class TestSnake(SnakeGameTest):
     def test_snake_initialization(self):
         """Test initial snake state and properties."""
         self.assertEqual(len(self.snake.positions), 3)
-        self.assertEqual(self.snake.score, 0)
+        self.assertEqual(self.snake.length, 3)
+        self.assertEqual(self.snake.speed, 6)
         self.assert_valid_direction(self.snake.direction)
         for pos in self.snake.positions:
             self.assert_position_in_grid(pos)

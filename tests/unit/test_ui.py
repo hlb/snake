@@ -95,6 +95,7 @@ class TestGameRenderer(unittest.TestCase):
         """Test score display in game."""
         score = 100
         high_score = 200
+        start_time = pygame.time.get_ticks()
 
         # Create mock game objects
         class MockObject:
@@ -105,7 +106,7 @@ class TestGameRenderer(unittest.TestCase):
         food = MockObject()
         obstacles = MockObject()
 
-        self.renderer.render_game(self.screen, snake, food, obstacles, score, high_score)
+        self.renderer.render_game(self.screen, snake, food, obstacles, score, high_score, start_time)
 
         # Get the screen's pixel array
         pixel_array = pygame.surfarray.array3d(self.screen)
@@ -139,9 +140,10 @@ class TestGameRenderer(unittest.TestCase):
         food = MockObject()
         obstacles = MockObject()
         screenshot_manager = Screenshot()
+        start_time = pygame.time.get_ticks()
 
         # Test rendering with screenshot manager
-        self.renderer.render_game(self.screen, snake, food, obstacles, score=100, high_score=200, screenshot_manager=screenshot_manager)
+        self.renderer.render_game(self.screen, snake, food, obstacles, score=100, high_score=200, start_time=start_time, screenshot_manager=screenshot_manager)
 
         # Verify screen has been modified
         pixel_array = pygame.surfarray.array3d(self.screen)

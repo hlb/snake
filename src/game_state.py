@@ -1,3 +1,7 @@
+import logging
+import pygame
+
+
 class GameState:
     def __init__(self):
         self.score = 0
@@ -19,8 +23,11 @@ class GameState:
 
     def save_high_score(self):
         """Save the current high score to file."""
-        with open("high_score.txt", "w", encoding="utf-8") as f:
-            f.write(str(self.high_score))
+        try:
+            with open("high_score.txt", "w", encoding="utf-8") as f:
+                f.write(str(self.high_score))
+        except (IOError, PermissionError) as e:
+            logging.error("Failed to save high score: %s", str(e))
 
     def update_score(self, new_score):
         """Update the current score and high score if necessary."""
@@ -35,6 +42,7 @@ class GameState:
         self.is_game_over = False
         self.is_playing = True
         self.is_paused = False
+        self.start_time = pygame.time.get_ticks()
 
     def end_game(self):
         """End the current game."""

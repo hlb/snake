@@ -35,7 +35,6 @@ class Snake:
     def __init__(self):
         """Initialize a new snake with default settings."""
         # Essential attributes kept for testing
-        self.score = 0
         self.speed = 6  # Initial speed
         self.length = 3
         self.positions = []  # Will be set in _initialize_snake
