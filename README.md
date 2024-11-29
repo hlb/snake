@@ -115,6 +115,6 @@ python -m unittest tests/integration/*.py -v       # Integration tests
 To run code coverage:
 
 ```bash
-coverage run -m pytest
-coverage report
+python -m pytest --cov=.
 coverage html  # generates HTML report in htmlcov/
+```
