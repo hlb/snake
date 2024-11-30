@@ -49,3 +49,6 @@ screenshots/
 venv/
 .venv/
 ENV/
+
+# Documentation
+docs/*.pdf
