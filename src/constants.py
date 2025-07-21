@@ -21,6 +21,7 @@ NORMAL_FOOD_COLOR = FOOD_COLOR
 GOLDEN_APPLE_COLOR = (255, 215, 0)  # Gold color
 SPEED_FRUIT_COLOR = (138, 43, 226)  # Purple color
 SLOW_FRUIT_COLOR = (65, 105, 225)  # Royal blue color
+GHOST_FOOD_COLOR = (255, 255, 255)  # White color for ghost food
 
 # Game settings
 WINDOW_WIDTH = 800
@@ -42,7 +43,12 @@ FOOD_TYPES = {
         "speed_change": -2,
         "duration": 5000,
     },  # 5 seconds slow effect
+    "ghost": {"points": 1, "speed_change": 0, "duration": 8000},  # 8 seconds ghost mode
 }
+
+# Ghost mode settings
+GHOST_MODE_DURATION = 8000  # 8 seconds in milliseconds
+GHOST_ALPHA = 128  # Transparency level for ghost snake (0-255)
 
 # Direction constants
 UP = (0, -1)

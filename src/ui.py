@@ -96,6 +96,12 @@ class GameRenderer:
         elapsed_time = (pygame.time.get_ticks() - start_time) // 1000
         self.render_text(screen, f"Time: {elapsed_time}s", SCORE_COLOR, (WINDOW_WIDTH // 2, 20), 32, align="center")
 
+        # Draw ghost mode indicator
+        if snake.effects.ghost_mode:
+            remaining_time = max(0, (snake.effects.ghost_end_time - pygame.time.get_ticks()) / 1000)
+            ghost_text = f"👻 GHOST MODE: {remaining_time:.1f}s"
+            self.render_text(screen, ghost_text, (255, 255, 255), (WINDOW_WIDTH // 2, 50), 24, align="center")
+
         if screenshot_manager:
             screenshot_manager.update(screen)
 

@@ -41,7 +41,7 @@ python snake_game.py --screenshots
 | Q | Quit game |
 
 ### Power-ups and Scoring
-The game features four types of collectible food items:
+The game features five types of collectible food items:
 
 - 🍕 **Normal Food**
   - Basic food items (🍕🍇🍪🍓)
@@ -64,6 +64,13 @@ The game features four types of collectible food items:
   - Temporarily decreases snake speed
   - Adds 1 point to score
   - Effect duration is temporary
+
+- 👻 **Ghost Food**
+  - Rare ghost power-up (👻)
+  - Temporarily allows passing through obstacles
+  - Adds 1 point to score
+  - Makes snake translucent during effect
+  - 8-second duration with visual countdown
 
 ### Game Mechanics
 - Snake wraps around screen edges for continuous gameplay

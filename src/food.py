@@ -9,6 +9,7 @@ from .constants import (
     GOLDEN_APPLE_COLOR,
     SPEED_FRUIT_COLOR,
     SLOW_FRUIT_COLOR,
+    GHOST_FOOD_COLOR,
     FOOD_TYPES,
 )
 from .particle_system import ParticleSystem
@@ -55,6 +56,7 @@ class Food:
             "golden": ["🌟", "⭐", "🌞"],
             "speed": ["⚡", "🚀", "💨"],
             "slow": ["🐌", "🦥", "🐢"],
+            "ghost": ["👻"],
         }
 
         # Initialize food items
@@ -70,18 +72,21 @@ class Food:
 
         # Set random type based on probabilities
         rand = random.random()
-        if rand < 0.60:
+        if rand < 0.50:  # 50% normal (reduced from 60%)
             type_name = "normal"
             color = NORMAL_FOOD_COLOR
-        elif rand < 0.75:
+        elif rand < 0.65:  # 15% golden (reduced from 15%)
             type_name = "golden"
             color = GOLDEN_APPLE_COLOR
-        elif rand < 0.875:
+        elif rand < 0.80:  # 15% speed (reduced from 12.5%)
             type_name = "speed"
             color = SPEED_FRUIT_COLOR
-        else:
+        elif rand < 0.95:  # 15% slow (reduced from 12.5%)
             type_name = "slow"
             color = SLOW_FRUIT_COLOR
+        else:  # 5% ghost (new rare power-up)
+            type_name = "ghost"
+            color = GHOST_FOOD_COLOR
 
         # Get effect properties and set emoji
         properties = FOOD_TYPES[type_name]
@@ -159,11 +164,14 @@ class Food:
                     particle_count = 30  # More particles for golden food
                 elif food.type == "speed":
                     particle_count = 25  # Medium amount for speed food
+                elif food.type == "ghost":
+                    particle_count = 35  # Special effect for ghost food
 
                 self.particle_system.emit(x, y, food.color, count=particle_count)
 
-                # Remove eaten food and return its properties
-                properties = food.properties
+                # Remove eaten food and return its properties and type
+                properties = food.properties.copy()
+                properties["food_type"] = food.type  # Add food type to properties
                 self.foods.pop(i)
                 self._ensure_minimum_food()
                 return properties

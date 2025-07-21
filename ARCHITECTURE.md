@@ -88,22 +88,27 @@ snake/
 ### 6. Food System (src/food.py)
 - **Responsibility**: Food item management
 - **Types**:
-  - Normal Food (40% chance)
+  - Normal Food (50% chance)
     - +1 point
     - Regular speed
     - Emojis: 🍕🍇🍪🍓
-  - Golden Food (20% chance)
+  - Golden Food (15% chance)
     - +2 points
     - Regular speed
     - Emojis: 🌟⭐🌞
-  - Speed Food (20% chance)
+  - Speed Food (15% chance)
     - +1 point
     - Temporary speed boost
     - Emojis: ⚡🚀💨
-  - Slow Food (20% chance)
+  - Slow Food (15% chance)
     - +1 point
     - Temporary speed reduction
     - Emojis: 🐌🦥🐢
+  - Ghost Food (5% chance)
+    - +1 point
+    - Temporary obstacle immunity
+    - 8-second duration
+    - Emoji: 👻
 - **Features**:
   - Random position generation
   - Collision avoidance with obstacles
