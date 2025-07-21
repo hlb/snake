@@ -13,6 +13,8 @@ class SoundManager:
         self.eat_sound = None
         self.crash_sound = None
         self.background_music = None
+        self.ghost_activate_sound = None
+        self.ghost_deactivate_sound = None
         self.background_channel = pygame.mixer.Channel(0)
 
         # Load sounds
@@ -36,6 +38,8 @@ class SoundManager:
         self.eat_sound = self.load_sound("sounds/eat.wav")
         self.crash_sound = self.load_sound("sounds/crash.wav")
         self.background_music = self.load_sound("sounds/background.mp3")
+        self.ghost_activate_sound = self.load_sound("sounds/ghost_activate.wav")
+        self.ghost_deactivate_sound = self.load_sound("sounds/ghost_deactivate.wav")
 
         # Set volumes
         if self.eat_sound:
@@ -45,6 +49,10 @@ class SoundManager:
         if self.background_music:
             self.background_music.set_volume(0.8)
             self.background_channel.set_volume(0.8)
+        if self.ghost_activate_sound:
+            self.ghost_activate_sound.set_volume(0.5)
+        if self.ghost_deactivate_sound:
+            self.ghost_deactivate_sound.set_volume(0.5)
 
     def play_background_music(self):
         """Start playing background music on loop."""
@@ -74,3 +82,13 @@ class SoundManager:
         """Play the crash sound effect."""
         if self.crash_sound:
             self.crash_sound.play()
+    
+    def play_ghost_activate_sound(self):
+        """Play the ghost mode activation sound effect."""
+        if self.ghost_activate_sound:
+            self.ghost_activate_sound.play()
+    
+    def play_ghost_deactivate_sound(self):
+        """Play the ghost mode deactivation sound effect."""
+        if self.ghost_deactivate_sound:
+            self.ghost_deactivate_sound.play()

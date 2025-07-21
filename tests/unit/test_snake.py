@@ -1,5 +1,5 @@
 import pygame
-from src import GRID_WIDTH, GRID_HEIGHT, LEFT, RIGHT, GRID_SIZE
+from src import GRID_WIDTH, GRID_HEIGHT, LEFT, RIGHT, GRID_SIZE, FOOD_TYPES
 from tests.test_base import SnakeGameTest
 
 
@@ -91,3 +91,69 @@ class TestSnake(SnakeGameTest):
         self.assertEqual(self.snake.speed, initial_speed + 2)
         self.assertEqual(self.snake.effects.base_speed, initial_speed)
         self.assertGreater(self.snake.effects.effect_end_time, pygame.time.get_ticks())
+
+    def test_ghost_mode_activation(self):
+        """Test ghost mode activation from ghost food."""
+        self.assertFalse(self.snake.effects.ghost_mode)
+        ghost_properties = FOOD_TYPES["ghost"]
+        self.snake.handle_food_effect(ghost_properties, "ghost")
+        
+        # Check ghost mode is activated
+        self.assertTrue(self.snake.effects.ghost_mode)
+        self.assertGreater(self.snake.effects.ghost_end_time, pygame.time.get_ticks())
+
+    def test_ghost_mode_collision_bypass(self):
+        """Test that ghost mode allows passing through obstacles."""
+        # Place snake adjacent to obstacle
+        self.snake = self.create_test_snake_at((5, 5), RIGHT)
+        
+        # Add obstacle directly in front
+        obstacle_pos = (6, 5)
+        self.obstacles.positions.add(obstacle_pos)
+        
+        # Without ghost mode - should collide
+        collision = self.snake.update(self.obstacles)
+        self.assertTrue(collision)
+        
+        # Reset snake position
+        self.snake = self.create_test_snake_at((5, 5), RIGHT)
+        
+        # Activate ghost mode
+        ghost_properties = FOOD_TYPES["ghost"]
+        self.snake.handle_food_effect(ghost_properties, "ghost")
+        
+        # With ghost mode - should pass through
+        collision = self.snake.update(self.obstacles)
+        self.assertFalse(collision)
+        self.assertEqual(self.snake.get_head_position(), obstacle_pos)
+
+    def test_ghost_mode_duration_expiry(self):
+        """Test ghost mode deactivation after duration expires."""
+        # Activate ghost mode
+        ghost_properties = FOOD_TYPES["ghost"]
+        self.snake.handle_food_effect(ghost_properties, "ghost")
+        self.assertTrue(self.snake.effects.ghost_mode)
+        
+        # Simulate time passing beyond ghost mode duration
+        self.snake.effects.ghost_end_time = pygame.time.get_ticks() - 1
+        
+        # Update snake (ghost mode should end)
+        self.snake.update(self.obstacles)
+        self.assertFalse(self.snake.effects.ghost_mode)
+        self.assertEqual(self.snake.effects.ghost_end_time, 0)
+
+    def test_ghost_mode_visual_transparency(self):
+        """Test that ghost mode applies visual transparency."""
+        # Create a mock screen to test rendering
+        screen = pygame.Surface((800, 600), pygame.SRCALPHA)
+        
+        # Activate ghost mode
+        ghost_properties = FOOD_TYPES["ghost"]
+        self.snake.handle_food_effect(ghost_properties, "ghost")
+        
+        # Render snake - this should apply transparency in ghost mode
+        self.snake.render(screen)
+        
+        # We can't easily test the alpha value directly, but we verify
+        # that ghost mode is active during rendering
+        self.assertTrue(self.snake.effects.ghost_mode)

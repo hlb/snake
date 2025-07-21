@@ -10,6 +10,8 @@ from .constants import (
     LEFT,
     RIGHT,
     draw_rounded_rect,
+    GHOST_MODE_DURATION,
+    GHOST_ALPHA,
 )
 from .particle_system import ParticleSystem
 
@@ -21,6 +23,8 @@ class SnakeEffects:
     base_speed: int = 6  # Keep track of base speed
     effect_end_time: int = 0  # Track when speed effect ends
     gradient_colors: list[tuple[int, int, int]] = None  # Snake gradient colors
+    ghost_mode: bool = False  # Ghost mode state
+    ghost_end_time: int = 0  # Track when ghost mode ends
 
     def __post_init__(self):
         if self.gradient_colors is None:
@@ -76,16 +80,24 @@ class Snake:
 
     def _check_collision(self, new_pos, obstacles):
         """Check if the new position results in a collision."""
-        # Check collision with obstacles
-        if new_pos in obstacles.positions:
+        # Check collision with obstacles (skip if in ghost mode)
+        if not self.effects.ghost_mode and new_pos in obstacles.positions:
             return True
         # Check collision with self (excluding the tail which will move)
         if new_pos in self.positions[:-1]:
             return True
         return False
 
-    def handle_food_effect(self, food_properties):
+    def handle_food_effect(self, food_properties, food_type=None, sound_manager=None):
         """Handle the effects of different food types."""
+        # Handle ghost mode
+        if food_type == "ghost":
+            self.effects.ghost_mode = True
+            self.effects.ghost_end_time = pygame.time.get_ticks() + food_properties["duration"]
+            if sound_manager:
+                sound_manager.play_ghost_activate_sound()
+            return
+        
         # Handle speed change only
         if food_properties["speed_change"] != 0:
             self.effects.base_speed = self.speed  # Store current base speed
@@ -94,13 +106,21 @@ class Snake:
             if food_properties["duration"] > 0:
                 self.effects.effect_end_time = pygame.time.get_ticks() + food_properties["duration"]
 
-    def update(self, obstacles):
+    def update(self, obstacles, sound_manager=None):
         """Update snake position and check for collisions."""
-        # Check if speed effect should end
         current_time = pygame.time.get_ticks()
+        
+        # Check if speed effect should end
         if self.effects.effect_end_time > 0 and current_time >= self.effects.effect_end_time:
             self.speed = self.effects.base_speed
             self.effects.effect_end_time = 0
+        
+        # Check if ghost mode should end
+        if self.effects.ghost_mode and current_time >= self.effects.ghost_end_time:
+            self.effects.ghost_mode = False
+            self.effects.ghost_end_time = 0
+            if sound_manager:
+                sound_manager.play_ghost_deactivate_sound()
 
         current = self.get_head_position()
         dx, dy = self.direction
@@ -136,5 +156,10 @@ class Snake:
             color = self.effects.gradient_colors[min(gradient_index, len(self.effects.gradient_colors) - 1)]
 
             # Use cached surface for this color
-            segment_surface = self.cached_segment_surfaces[color]
+            segment_surface = self.cached_segment_surfaces[color].copy()
+            
+            # Apply ghost mode transparency
+            if self.effects.ghost_mode:
+                segment_surface.set_alpha(GHOST_ALPHA)
+            
             screen.blit(segment_surface, (pos[0] * GRID_SIZE, pos[1] * GRID_SIZE))

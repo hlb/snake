@@ -102,7 +102,14 @@ class TestGameRenderer(unittest.TestCase):
             def render(self, screen):
                 pass
 
+        # Add effects to snake mock
+        class MockEffects:
+            def __init__(self):
+                self.ghost_mode = False
+                self.ghost_end_time = 0
+
         snake = MockObject()
+        snake.effects = MockEffects()
         food = MockObject()
         obstacles = MockObject()
 
@@ -136,7 +143,14 @@ class TestGameRenderer(unittest.TestCase):
             def get_body(self):
                 return [(90, 100), (80, 100)]
 
+        # Add effects to snake mock
+        class MockEffects:
+            def __init__(self):
+                self.ghost_mode = False
+                self.ghost_end_time = 0
+
         snake = MockObject()
+        snake.effects = MockEffects()
         food = MockObject()
         obstacles = MockObject()
         screenshot_manager = Screenshot()

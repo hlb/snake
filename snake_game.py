@@ -23,7 +23,7 @@ def handle_direction_change(key, snake):
 def update_game_state(snake, obstacles, food, sound_manager, game_state, enable_screenshots=False, screenshot_manager=None):
     """Update game state and handle collisions."""
     # Check for collision with obstacles or self
-    if snake.update(obstacles):
+    if snake.update(obstacles, sound_manager):
         sound_manager.play_crash_sound()
         return True
 
@@ -33,7 +33,7 @@ def update_game_state(snake, obstacles, food, sound_manager, game_state, enable_
         sound_manager.play_eat_sound()
         snake.length += food_properties["points"]
         game_state.update_score(game_state.score + food_properties["points"])  # Update score directly in game_state
-        snake.handle_food_effect(food_properties)
+        snake.handle_food_effect(food_properties, food_properties.get("food_type"), sound_manager)
 
         # Schedule screenshot if enabled
         if enable_screenshots and screenshot_manager:
